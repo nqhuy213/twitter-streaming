@@ -1,7 +1,9 @@
 const express = require("express");
-const path = require("path");
 const registerRoutes = require("./registerRoutes");
 const registerMiddlewares = require("./registerMiddlewares");
+const registerSocket = require("./registerSocket");
+const io = require("socket.io-client");
+const connect = require("./socket/client");
 
 if (process.env.NODE_ENV === "development") {
   require("dotenv").config();
@@ -16,9 +18,14 @@ function createApp() {
 
 function startApp() {
   const app = createApp();
-  app.listen(process.env.PORT, () => {
-    console.log(`Server is running on http://localhost:${process.env.PORT}`);
+  const server = app.listen(process.env.FILTER_PORT, () => {
+    console.log(
+      `Server is running on http://localhost:${process.env.FILTER_PORT}`
+    );
   });
+
+  registerSocket(server, app);
+  connect(process.env.STREAM_SERVICE_URL);
 }
 
 startApp();
