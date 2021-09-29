@@ -9,22 +9,26 @@ function run() {
   const app = {};
   registerDatabase(app);
   const worker = setInterval(async () => {
-    /** Query database */
-    const allStream = await app.db.Stream.find({});
-    /** Query Twitter rules */
-    let allRules = await getRules();
-    allRules = allRules.data ? allRules.data.map((r) => r.value) : [];
-    let missingRules = [];
+    if (app.db) {
+      /** Query database */
+      const allStream = await app.db.Stream.find({});
+      /** Query Twitter rules */
+      let allRules = await getRules();
+      allRules = allRules.data ? allRules.data.map((r) => r.value) : [];
+      let missingRules = [];
 
-    for (const stream of allStream) {
-      for (const rule of stream.rules) {
-        if (!allRules.includes(rule.value)) {
-          missingRules.push({ value: rule.value });
+      for (const stream of allStream) {
+        for (const rule of stream.rules) {
+          if (!allRules.includes(rule.value)) {
+            missingRules.push({ value: rule.value });
+          }
         }
       }
+      const added = await addRules(missingRules);
+      if (missingRules.length > 0) {
+        console.log(missingRules);
+      }
     }
-    const added = await addRules(missingRules);
-    console.log(missingRules);
   }, 2000);
 }
 

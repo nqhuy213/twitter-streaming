@@ -2,6 +2,7 @@ const { searchTweets, deleteRules } = require("../libs/api");
 
 function registerSocket(server, app) {
   const io = require("socket.io")(server);
+  console.log("---- Connecting Socket ----");
   app.io = io;
   app.clientConnectionIds = new Set();
   const connections = new Set();
@@ -18,19 +19,21 @@ function registerSocket(server, app) {
         await newStream.save();
       });
 
-      socket.once("disconnect", async function () {
+      socket.on("disconnect", async function () {
         connections.delete(socket);
         app.clientConnectionIds.delete(socket.id);
         /** Delete in database */
-        const deletedStream = await app.db.Stream.findOneAndDelete({
+        app.db.Stream.findOneAndDelete({
           socketId: socket.id,
+        }).then((deletedStream) => {
+          deleteRules(deletedStream.rules).then((res) => {
+            console.log(`To delete ${deletedStream.socketId}`);
+
+            /** Delete rules in Twitter */
+
+            console.log(`Socket ${socket.id} disconnected`);
+          });
         });
-
-        console.log(`To delete ${deletedStream.socketId}`);
-
-        /** Delete rules in Twitter */
-        await deleteRules(deletedStream.rules);
-        console.log(`Socket ${socket.id} disconnected`);
       });
     } catch (error) {
       console.log(error);

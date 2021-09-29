@@ -11,11 +11,12 @@ function connectToServer(url, app) {
     const allStream = await app.db.Stream.find({
       socketId: { $in: [...app.clientConnectionIds] },
     });
-    // console.log(allStream);
+    console.log(allStream);
     for (const stream of allStream) {
       for (const streamRule of stream.rules) {
         if (matchingRules.includes(streamRule.id)) {
           /** Send data to that streaming client socket */
+          console.log(data);
           app.io.to(stream.socketId).emit("data", data);
           break;
         }

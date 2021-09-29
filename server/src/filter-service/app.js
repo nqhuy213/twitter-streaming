@@ -21,13 +21,12 @@ function createApp() {
 function startApp() {
   const app = createApp();
   const server = app.listen(process.env.FILTER_PORT, () => {
+    registerSocket(server, app);
+    connect(process.env.STREAM_SERVICE_URL, app);
     console.log(
       `Server is running on http://localhost:${process.env.FILTER_PORT}`
     );
   });
-
-  registerSocket(server, app);
-  connect(process.env.STREAM_SERVICE_URL, app);
 }
 
 startApp();

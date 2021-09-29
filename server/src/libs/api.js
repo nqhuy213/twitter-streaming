@@ -53,7 +53,16 @@ const addRules = async (rules) => {
 };
 
 const deleteRules = async (rules) => {
-  const ids = rules.map((rule) => rule.id);
+  let existedRules = await getRules();
+  existedRules = existedRules.data;
+  const values = rules.map((rule) => rule.value);
+  let ids = [];
+  for (const rule of existedRules) {
+    if (values.includes(rule.value)) {
+      ids.push(rule.id);
+    }
+  }
+
   const body = {
     delete: { ids },
   };
