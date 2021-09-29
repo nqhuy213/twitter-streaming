@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev:stream": "cross-env NODE_ENV=development nodemon src/stream-service/app.js",
-    "dev:filter": "cross-env NODE_ENV=development nodemon src/filter-service/app.js"
+    "dev:filter": "cross-env NODE_ENV=development nodemon src/filter-service/app.js",
+    "dev:worker": "cross-env NODE_ENV=development nodemon src/sync-worker/worker.js"
   },
   "keywords": [],
   "author": "",

@@ -1,7 +1,9 @@
 const { getRules, addRules } = require("../libs/api");
 const registerDatabase = require("../libs/database/registerDatabase");
 
-require("dotenv").config();
+if (process.env.NODE_ENV === "development") {
+  require("dotenv").config();
+}
 
 function run() {
   const app = {};
