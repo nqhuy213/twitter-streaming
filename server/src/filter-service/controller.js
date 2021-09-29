@@ -19,7 +19,7 @@ class Controller {
       /** Create a room in a socket */
 
       /** Store the roomId with the specific rules */
-      successResponse(res, { hello: "meo" });
+      successResponse(res, { ownRules });
     } catch (error) {
       errorResponse(res, 500, error.message);
     }
@@ -47,7 +47,7 @@ class Controller {
   deleteStreamRules = async (req, res, next) => {
     try {
       const { rules } = req.body;
-      const response = deleteRules(rules);
+      const response = await deleteRules(rules);
       successResponse(res, { deleted: response });
     } catch (error) {
       errorResponse(res, 500, error.message);
