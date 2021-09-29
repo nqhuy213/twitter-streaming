@@ -4,6 +4,7 @@ const registerMiddlewares = require("./registerMiddlewares");
 const registerSocket = require("./registerSocket");
 const io = require("socket.io-client");
 const connect = require("./socket/client");
+const registerDatabase = require("../libs/database/registerDatabase");
 
 if (process.env.NODE_ENV === "development") {
   require("dotenv").config();
@@ -13,6 +14,7 @@ function createApp() {
   const app = express();
   registerMiddlewares(app);
   registerRoutes(app);
+  registerDatabase(app);
   return app;
 }
 
@@ -25,7 +27,7 @@ function startApp() {
   });
 
   registerSocket(server, app);
-  connect(process.env.STREAM_SERVICE_URL);
+  connect(process.env.STREAM_SERVICE_URL, app);
 }
 
 startApp();

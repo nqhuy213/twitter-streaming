@@ -4,9 +4,9 @@ function registerSocket(server, app) {
   const connections = new Set();
   io.on("connection", (socket) => {
     connections.add(socket);
-    console.log(socket.id);
     socket.once("disconnect", function () {
-      connections.delete(s);
+      console.log("Filter service disconnected");
+      connections.delete(socket);
     });
   });
 }

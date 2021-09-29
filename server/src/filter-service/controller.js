@@ -13,12 +13,13 @@ class Controller {
 
   searchTweets = async (req, res, next) => {
     try {
-      const keywords = req.query.keywords.split(",");
+      const { keywords, socket } = req.body;
       // console.log(keywords);
       const ownRules = await searchTweets(keywords);
-      /** Create a room in a socket */
 
-      /** Store the roomId with the specific rules */
+      /** Store the socket with the specific rules */
+      const newStream = new this.app.db.Stream({ socket, rules: ownRules });
+      await newStream.save();
       successResponse(res, { ownRules });
     } catch (error) {
       errorResponse(res, 500, error.message);
