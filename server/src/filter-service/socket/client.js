@@ -16,7 +16,7 @@ function connectToServer(url, app) {
       for (const streamRule of stream.rules) {
         if (matchingRules.includes(streamRule.id)) {
           /** Send data to that streaming client socket */
-          console.log(data);
+          console.log(streamRule);
           app.io.to(stream.socketId).emit("data", data);
           break;
         }
