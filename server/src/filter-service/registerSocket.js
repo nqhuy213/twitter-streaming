@@ -26,6 +26,8 @@ function registerSocket(server, app) {
           socketId: socket.id,
         });
 
+        console.log(`To delete ${deletedStream.socketId}`);
+
         /** Delete rules in Twitter */
         await deleteRules(deletedStream.rules);
         console.log(`Socket ${socket.id} disconnected`);

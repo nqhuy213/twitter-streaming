@@ -13,6 +13,7 @@ const searchTweets = async (keywords) => {
     existRules = existRules.data ? existRules.data : [];
     /** Add non-existing rules */
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
+    console.log(toAddRules);
     const ownRules = addRules(toAddRules).then((res) => {
       myRules = [...myRules, ...res.data];
       return myRules;

@@ -6,7 +6,7 @@ function connectToServer(url, app) {
   });
   socket.on("data", async (data) => {
     /** Handle incoming tweet */
-    const matchingRules = data.matching_rules;
+    const matchingRules = data.matching_rules.map((r) => r.id);
     /** Query database stream that has matching rules */
     const allStream = await app.db.Stream.find({
       socketId: { $in: [...app.clientConnectionIds] },
@@ -14,12 +14,10 @@ function connectToServer(url, app) {
     // console.log(allStream);
     for (const stream of allStream) {
       for (const streamRule of stream.rules) {
-        for (const matchingRule of matchingRules) {
-          if (streamRule.id === matchingRule.id) {
-            /** Send data to that streaming client socket */
-            app.io.to(stream.socketId).emit("data", data);
-            continue;
-          }
+        if (matchingRules.includes(streamRule.id)) {
+          /** Send data to that streaming client socket */
+          app.io.to(stream.socketId).emit("data", data);
+          break;
         }
       }
     }
