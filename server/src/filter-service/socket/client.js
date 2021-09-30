@@ -1,4 +1,7 @@
 const io = require("socket.io-client");
+const naturalAnalyseText = require("../analysis/naturalAnalysis");
+
+//connect to the server
 function connectToServer(url, app) {
   const socket = io(url);
   socket.on("connect", () => {
@@ -11,19 +14,27 @@ function connectToServer(url, app) {
     const allStream = await app.db.Stream.find({
       socketId: { $in: [...app.clientConnectionIds] },
     });
-    console.log(allStream);
+
+    // print all streams
+    // console.log(allStream);
     for (const stream of allStream) {
       for (const streamRule of stream.rules) {
         if (matchingRules.includes(streamRule.id)) {
+          /** Natural analysis is here */
+
           /** Send data to that streaming client socket */
-          console.log(streamRule);
+          // console.log(streamRule);
+          // console.log(data.data.text);
+          let sentimentData = await naturalAnalyseText(data.data.text);
+          console.log(sentimentData);
           app.io.to(stream.socketId).emit("data", data);
+          app.io.to(stream.socketId).emit("sentimentData", sentimentData);
           break;
         }
       }
     }
   });
-  socket.on("disconnect", () => {
+  socket.on("disconnect", (reason) => {
     console.log("Disconnected from Stream service.");
   });
 }

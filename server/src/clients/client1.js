@@ -7,3 +7,6 @@ socket.emit("streaming", keywords);
 socket.on("data", (data) => {
   console.log(data);
 });
+socket.on("sentimentData", (data) => {
+  console.log(data);
+});
