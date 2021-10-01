@@ -7,7 +7,7 @@ function createDatabase() {
   };
 }
 
-function registerDatabase(app) {
+function registerDatabase(app, cb) {
   console.log("---- Connecting Database ----");
   mongoose
     .connect(process.env.MONGODB_URI)
@@ -15,6 +15,7 @@ function registerDatabase(app) {
       console.log("---- MongoDb Connected ----");
       const db = createDatabase();
       app.db = db;
+      cb();
     })
     .catch((err) => {
       console.log(err.message);

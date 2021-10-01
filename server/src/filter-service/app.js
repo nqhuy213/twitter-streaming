@@ -14,18 +14,19 @@ function createApp() {
   const app = express();
   registerMiddlewares(app);
   registerRoutes(app);
-  registerDatabase(app);
   return app;
 }
 
 function startApp() {
   const app = createApp();
   const server = app.listen(process.env.FILTER_PORT, () => {
-    registerSocket(server, app);
-    connect(process.env.STREAM_SERVICE_URL, app);
-    console.log(
-      `Server is running on http://localhost:${process.env.FILTER_PORT}`
-    );
+    registerDatabase(app, () => {
+      registerSocket(server, app);
+      connect(process.env.STREAM_SERVICE_URL, app);
+      console.log(
+        `Server is running on http://localhost:${process.env.FILTER_PORT}`
+      );
+    });
   });
 }
 
