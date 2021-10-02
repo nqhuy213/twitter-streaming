@@ -108,4 +108,40 @@ const twitterApiCall = async (method = "GET", url, params, body) => {
   }
 };
 
-module.exports = { searchTweets, getStream, getRules, deleteRules, addRules };
+//delete all the rules in twitter
+const deleteAllRules = async () => {
+  let existedRules = await getRules();
+  if (existedRules.meta.result_count > 0) {
+    existedRules = existedRules.data;
+    let ids = [];
+    for (const rule of existedRules) {
+      ids.push(rule.id);
+    }
+
+    const body = {
+      delete: { ids },
+    };
+
+    try {
+      const response = await twitterApiCall(
+        "POST",
+        twitterStreamRules,
+        null,
+        body
+      );
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+module.exports = {
+  searchTweets,
+  getStream,
+  getRules,
+  deleteRules,
+  addRules,
+  deleteAllRules,
+};

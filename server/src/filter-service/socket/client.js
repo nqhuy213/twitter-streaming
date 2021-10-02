@@ -1,6 +1,9 @@
 const io = require("socket.io-client");
 const naturalAnalyseText = require("../analysis/naturalAnalysis");
 
+//redis
+const redis = require("redis").createClient();
+
 //connect to the server
 function connectToServer(url, app) {
   console.log(url);
@@ -28,9 +31,31 @@ function connectToServer(url, app) {
           // console.log(streamRule);
           // console.log(data.data.text);
           let sentimentData = await naturalAnalyseText(data.data.text);
-          console.log(sentimentData);
-          app.io.to(stream.socketId).emit("data", data);
-          app.io.to(stream.socketId).emit("sentimentData", sentimentData);
+          // console.log(sentimentData);
+
+          /** Store stream data in redis */
+          // Publish it
+          redis.publish("tweets", JSON.stringify(data));
+
+          // Persist it to a Redis list
+          redis.sadd("stream:tweets", JSON.stringify(data));
+
+          // // Get tweet
+          // redis.lrange("stream:tweets", 0, -1, function (err, tweets) {
+          //   if (err) {
+          //     console.log(err);
+          //   } else {
+          //     // Get tweets
+          //     let tweet_list = [];
+          //     tweets.forEach(function (tweet, i) {
+          //       tweet_list.push(JSON.parse(tweet));
+          //     });
+          //     app.io.to(stream.socketId).emit("redisData", tweet_list);
+          //   }
+          // });
+
+          // app.io.to(stream.socketId).emit("data", data);
+          // app.io.to(stream.socketId).emit("sentimentData", sentimentData);
           break;
         }
       }

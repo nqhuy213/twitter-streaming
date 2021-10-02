@@ -1,11 +1,13 @@
 const { searchTweets, deleteRules } = require("../libs/api");
 
+//global set
+const connections = new Set();
+
 function registerSocket(server, app) {
   const io = require("socket.io")(server);
   console.log("---- Creating Socket Server ----");
   app.io = io;
   app.clientConnectionIds = new Set();
-  const connections = new Set();
   console.log("---- Socket server created ----");
   io.on("connection", (socket) => {
     connections.add(socket);
@@ -43,4 +45,14 @@ function registerSocket(server, app) {
   });
 }
 
-module.exports = registerSocket;
+function deregisterAllSockets() {
+  console.log("---- Deregister all sockets ----");
+  for (const socket of connections) {
+    socket.disconnect();
+    socket.close();
+
+    connections.delete(socket);
+  }
+}
+
+module.exports = { registerSocket, deregisterAllSockets };
