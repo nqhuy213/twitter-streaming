@@ -2,10 +2,11 @@ const { searchTweets, deleteRules } = require("../libs/api");
 
 function registerSocket(server, app) {
   const io = require("socket.io")(server);
-  console.log("---- Connecting Socket ----");
+  console.log("---- Creating Socket Server ----");
   app.io = io;
   app.clientConnectionIds = new Set();
   const connections = new Set();
+  console.log("---- Socket server created ----");
   io.on("connection", (socket) => {
     connections.add(socket);
     app.clientConnectionIds.add(socket.id);

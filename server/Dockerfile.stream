@@ -1,4 +1,3 @@
-
 FROM node:14-alpine AS node
 # Builder stage
 
@@ -41,4 +40,4 @@ RUN npm i --only=production
 COPY --from=builder /app/build ./build
 
 # Use js files to run the application
-ENTRYPOINT ["node", "./build/stream-service/app.js"]
+CMD ["node", "./build/stream-service/app.js"]

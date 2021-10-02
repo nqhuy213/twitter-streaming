@@ -41,4 +41,4 @@ RUN npm i --only=production
 COPY --from=builder /app/build ./build
 
 # Use js files to run the application
-ENTRYPOINT ["node", "./build/filter-service/app.js"]
+CMD ["node", "./build/filter-service/app.js"]

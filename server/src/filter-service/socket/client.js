@@ -3,12 +3,14 @@ const naturalAnalyseText = require("../analysis/naturalAnalysis");
 
 //connect to the server
 function connectToServer(url, app) {
+  console.log(url);
   const socket = io(url);
   socket.on("connect", () => {
     console.log("Stream socket connected");
   });
   socket.on("data", async (data) => {
     /** Handle incoming tweet */
+    // console.log(data);
     const matchingRules = data.matching_rules.map((r) => r.id);
     /** Query database stream that has matching rules */
     const allStream = await app.db.Stream.find({
