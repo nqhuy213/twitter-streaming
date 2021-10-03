@@ -65,30 +65,42 @@ function startApp() {
   // });
 
   //get the tweets which are already stored in cache
-  app.get("/getTweetsCache", (req, res, next) => {
-    var BreakException = {};
-    // Get tweets from redis
-    redis.smembers("stream:tweets", function (err, tweets) {
-      if (err) {
-        console.log(err);
-      } else {
-        // Get 10 tweets
-        let tweet_list = [];
-        try {
-          tweets.forEach(function (tweet, i) {
-            tweet_list.push(JSON.parse(tweet));
-            if (i > 9) {
-              throw BreakException;
-            }
-          });
-        } catch (e) {
-          if (e !== BreakException) throw e;
-        }
+  app.get(
+    "/getTweetsCache",
+    (req, res, next) => {
+      // res.setHeader("Content-Type", "text/html; charset=utf-8");
+      // res.setHeader("Transfer-Encoding", "chunked");
+      var BreakException = {};
+      // Get tweets from redis
+      // redis.smembers("stream:tweets", function (err, tweets) {
+      //   if (err) {
+      //     console.log(err);
+      //   } else {
+      //     // Get 10 tweets
+      //     let tweet_list = [];
+      //     try {
+      //       tweets.forEach(function (tweet, i) {
+      //         tweet_list.push(JSON.parse(tweet));
+      //         if (i > 9) {
+      //           throw BreakException;
+      //         }
+      //       });
+      //     } catch (e) {
+      //       if (e !== BreakException) throw e;
+      //     }
 
-        return res.status(200).send(tweet_list);
-      }
-    });
-  });
+      redis.xread("count", "100", "streams", "example", "0", (err, results) => {
+        return res.status(200).send(
+          results[0][1].map((result) => {
+            return JSON.parse(result[1][1]);
+          })
+        );
+      });
+      // return res.status(200).send(tweet_list);
+    }
+    // });
+    // }
+  );
 }
 
 startApp();

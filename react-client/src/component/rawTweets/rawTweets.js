@@ -1,9 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { SocketContext } from "../../context/socket";
+import { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { Fade, Reveal } from "react-reveal";
-import BootstrapSwitchButton from "bootstrap-switch-button-react";
-// import socketio from "socket.io-client";
+import { Reveal } from "react-reveal";
+import useInfiniteScroll from "react-infinite-scroll-hook";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { Tweet } from "react-twitter-widgets";
 
 import "./rawTweets.css";
@@ -15,24 +14,10 @@ const url = "http://localhost:3001";
 export function RawTweets() {
   const [keywords, setKeywords] = useState();
 
-  const { response, loading, error } = FetchTweetsRedis();
+  const [{ response, loading, error }, again] = FetchTweetsRedis();
+  const [i, setI] = useState(1);
 
-  const { socket, update } = useContext(SocketContext);
-
-  //initializing
-  // const keywords = ["dog", "bear"];
-
-  const liveStream = (keywords, timeout) => {
-    socket.emit("streaming", keywords);
-    socket.on("redisData", (data) => {
-      console.log(data);
-    });
-    setInterval(() => {
-      socket.disconnect();
-      socket.close();
-    }, timeout * 1000);
-  };
-
+  //states for infinite scroll
   const handleInput = (e) => {
     // console.log(e.target.value);
     setKeywords(e.target.value);
@@ -40,31 +25,18 @@ export function RawTweets() {
 
   const handleAdd = () => {
     //after 3 seconds, kill me
-    liveStream(keywords.split(" "), 3);
+    again(i);
+    setI((prev) => prev + 1);
   };
 
-  useEffect(() => {
-    // after 3 seconds, kill me
-    // liveStream(3);
-    // console.log(socket);
-    // liveStream(1);
-    // axios({
-    //   method: "post",
-    //   url: "http://localhost:3001/stream/live",
-    //   data: {
-    //     keywords: keywords,
-    //     timeout: 10,
-    //   },
-    // })
-    //   .then((res) => console.log(res))
-    //   .catch((err) => console.log(err));
-    // axios.post("http://localhost:3001/getTweet");
-    // socket.on("redisData", (data) => {
-    //   console.log(data);
-    // });
-  }, []);
+  //infinite scroll
+  // const infiniteRef = useInfiniteScroll({
+  //   loading,
+  //   hasNextPage: true,
+  //   onLoadMore: handleAdd,
+  // });
 
-  if (loading === true && error.status === false) {
+  if (loading === true) {
     return (
       <div class="lds-roller">
         <div></div>
@@ -77,7 +49,7 @@ export function RawTweets() {
         <div></div>
       </div>
     );
-  } else if (loading === false && error.status === false) {
+  } else if (loading === false) {
     return (
       <Container>
         <Form.Group className="mb-3">
@@ -103,18 +75,39 @@ export function RawTweets() {
             </Col>
           </Row>
         </Form.Group>
-        {response.map((data) => {
-          return (
-            <Reveal effect="fadeInUp">
-              <Row className="justify-content-md-center">
-                <Col md={{ offset: 3 }}>
-                  <Tweet className="tweet" tweetId={`${data.data.id}`} />
-                </Col>
-              </Row>
-            </Reveal>
-          );
-        })}
+        {/* <div ref={infiniteRef}> */}
+        <InfiniteScroll
+          dataLength={response.length}
+          next={handleAdd}
+          hasMore={true}
+          loader={
+            <div class="lds-roller">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+          }
+        >
+          {response.map((data) => {
+            return (
+              <Reveal effect="fadeInUp">
+                <Row className="justify-content-md-center">
+                  <Col md={{ offset: 3 }}>
+                    <Tweet className="tweet" tweetId={`${data}`} />
+                  </Col>
+                </Row>
+              </Reveal>
+            );
+          })}
+        </InfiniteScroll>
+        {/* </div> */}
       </Container>
     );
   }
+  // return <h1>Hello</h1>;
 }

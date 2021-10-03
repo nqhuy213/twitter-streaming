@@ -2,7 +2,12 @@ const io = require("socket.io-client");
 const naturalAnalyseText = require("../analysis/naturalAnalysis");
 
 //redis
-const redis = require("redis").createClient();
+var redis = require("redis");
+require("redis-streams")(redis);
+var redisWStream = require("redis-wstream"); // factory
+var client = redis.createClient();
+
+var redisClient = redis.createClient();
 
 //connect to the server
 function connectToServer(url, app) {
@@ -35,11 +40,21 @@ function connectToServer(url, app) {
 
           /** Store stream data in redis */
           // Publish it
-          redis.publish("tweets", JSON.stringify(data));
+          // redis.publish("tweets", JSON.stringify(data));
 
           // Persist it to a Redis list
-          redis.sadd("stream:tweets", JSON.stringify(data));
+          // redis.sadd("stream:tweets", JSON.stringify(data));
 
+          /** Redis stream */
+          redisClient.xadd(
+            "example",
+            "MAXLEN",
+            1000000,
+            "*",
+            "rawTweet",
+            JSON.stringify(data.data)
+          );
+          // console.log("hello");
           // // Get tweet
           // redis.lrange("stream:tweets", 0, -1, function (err, tweets) {
           //   if (err) {
@@ -54,7 +69,7 @@ function connectToServer(url, app) {
           //   }
           // });
 
-          // app.io.to(stream.socketId).emit("data", data);
+          app.io.to(stream.socketId).emit("data", data);
           // app.io.to(stream.socketId).emit("sentimentData", sentimentData);
           break;
         }

@@ -10,6 +10,7 @@ function registerSocket(server, app) {
   app.clientConnectionIds = new Set();
   console.log("---- Socket server created ----");
   io.on("connection", (socket) => {
+    // deregisterAllSockets();
     connections.add(socket);
     app.clientConnectionIds.add(socket.id);
     console.log(`Socket ${socket.id} connected.`);
@@ -38,6 +39,16 @@ function registerSocket(server, app) {
           });
         });
       });
+      socket.on("deleteRules", async function () {
+        /** Delete in database */
+        app.db.Stream.findOne({
+          socketId: socket.id,
+        }).then((stream) => {
+          deleteRules(stream.rules).then((res) => {
+            console.log("Delete rules!");
+          });
+        });
+      });
     } catch (error) {
       console.log(error);
       throw error;
@@ -46,12 +57,13 @@ function registerSocket(server, app) {
 }
 
 function deregisterAllSockets() {
-  console.log("---- Deregister all sockets ----");
-  for (const socket of connections) {
-    socket.disconnect();
-    socket.close();
+  if (connections.size > 0) {
+    console.log("---- Deregister all sockets ----");
+    for (const socket of connections) {
+      socket.disconnect();
 
-    connections.delete(socket);
+      connections.delete(socket);
+    }
   }
 }
 
