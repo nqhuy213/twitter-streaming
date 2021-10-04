@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Reveal } from "react-reveal";
 import { PanelGroup, Panel } from "rsuite";
+import CreatableSelect from "react-select/creatable";
 
 import { Tweet } from "react-twitter-widgets";
 
@@ -13,29 +14,23 @@ import socketio from "socket.io-client";
 const url = "http://localhost:3001";
 
 export function RawTweets() {
-  const [keywords, setKeywords] = useState(["cat", "dog"]);
+  const [keywords, setKeywords] = useState([]);
   const [response, setResponse] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState({ status: false, message: "" });
 
-  // const [{ response, loading, error }, again, addRules, clear] =
-  //   FetchTweets(keywords);
-  // const [attempt, setAttempt] = useState(false);
-
-  //handle events
-  //rules bar
   const handleInput = (e) => {
     setKeywords(e.target.value);
     // console.log(e.target.value);
   };
 
+  const handleChange = (newValue, actionMeta) => {
+    setKeywords(newValue.map((val) => val.value));
+  };
+
+  console.log(keywords);
   //adding rules
   const handleAdd = () => {
-    // addRules(String(keywords).split(" "));
-    // setAttempt((prev) => prev++);
-    // again(attempt);
-
     try {
       const socket = socketio(url);
       // console.log(keywords);
@@ -82,11 +77,12 @@ export function RawTweets() {
         <Row>
           <Form.Label>Adding Rules</Form.Label>
           <Col className="col-search-rule" md={10}>
-            <Form.Control
+            {/* <Form.Control
               type="rules"
               placeholder="Adding rules here"
               onChange={handleInput}
-            />
+            /> */}
+            <CreatableSelect isMulti onChange={handleChange} />
           </Col>
           <Col md={1} className="col-btn-add">
             <Button
