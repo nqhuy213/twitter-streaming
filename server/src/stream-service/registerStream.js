@@ -1,7 +1,10 @@
 const needle = require("needle");
 
+// const twitterStreamUrl =
+//   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
+
 const twitterStreamUrl =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
+  "https://api.twitter.com/2/tweets/search/stream?&expansions=author_id&user.fields=name";
 
 function registerStream(app) {
   const stream = needle.get(twitterStreamUrl, {
@@ -16,6 +19,7 @@ function registerStream(app) {
       try {
         const tweet = JSON.parse(data);
         console.log(tweet);
+        // console.log(tweet.includes.users[0]);
         app.io.emit("data", tweet);
       } catch (error) {}
     })

@@ -68,6 +68,7 @@ function connectToServer(url, app) {
           //     app.io.to(stream.socketId).emit("redisData", tweet_list);
           //   }
           // });
+          // console.log(data);
 
           app.io.to(stream.socketId).emit("data", data);
           // app.io.to(stream.socketId).emit("sentimentData", sentimentData);

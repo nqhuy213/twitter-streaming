@@ -30,24 +30,36 @@ function registerSocket(server, app) {
         app.db.Stream.findOneAndDelete({
           socketId: socket.id,
         }).then((deletedStream) => {
-          deleteRules(deletedStream.rules).then((res) => {
-            console.log(`To delete ${deletedStream.socketId}`);
+          if (deletedStream !== null) {
+            deleteRules(deletedStream.rules)
+              .then((res) => {
+                console.log(`To delete ${deletedStream.socketId}`);
 
-            /** Delete rules in Twitter */
+                /** Delete rules in Twitter */
 
-            console.log(`Socket ${socket.id} disconnected`);
-          });
+                console.log(`Socket ${socket.id} disconnected`);
+              })
+              .catch((err) => console.log(err));
+          }
         });
       });
       socket.on("deleteRules", async function () {
         /** Delete in database */
         app.db.Stream.findOne({
           socketId: socket.id,
-        }).then((stream) => {
-          deleteRules(stream.rules).then((res) => {
-            console.log("Delete rules!");
+        })
+          .then((stream) => {
+            if (stream.rules !== []) {
+              deleteRules(stream.rules).then((res) => {
+                if (!res.message) {
+                  console.log("Delete rules!");
+                }
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
           });
-        });
       });
     } catch (error) {
       console.log(error);

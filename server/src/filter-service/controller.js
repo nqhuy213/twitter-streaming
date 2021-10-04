@@ -45,6 +45,7 @@ class Controller {
     }
   };
 
+  //delete rules
   deleteStreamRules = async (req, res, next) => {
     try {
       const { rules } = req.body;

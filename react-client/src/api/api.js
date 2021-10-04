@@ -1,29 +1,36 @@
-import { useState, useEffect, useContext, useCallback } from "react";
-import { SocketContext } from "../context/socket";
-import * as axios from "axios";
+import { useState, useEffect, useCallback } from "react";
+// import { SocketContext } from "../context/socket";
+import socketio from "socket.io-client";
+
+const url = "http://localhost:3001";
 
 //fetch all tweets which are saved in redis
-export function FetchTweetsRedis() {
+export function FetchTweets() {
   const [response, setResponse] = useState([]);
+  const [keywords, setKeywords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAgain, setAgain] = useState(0);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState({ status: false, message: "" });
-  const { socket } = useContext(SocketContext);
 
   const liveStream = useCallback((keywords, timeout) => {
     try {
-      // setLoading(true);
+      const socket = socketio(url);
+      // console.log(keywords);
+      setLoading(true);
       setError(false);
       socket.emit("streaming", keywords);
       socket.on("data", (data) => {
         setResponse((prev) => {
-          console.log(data.data.id);
-          return [...prev, data.data.id];
+          return [...prev, [data.data, data.includes.users]];
         });
       });
       setTimeout(() => {
-        socket.emit("deleteRules", keywords);
-        socket.off("data"); //stop listening
+        // socket.emit("deleteRules", keywords);
+        // socket.off("data"); //stop listening
+
+        //disconnect socket
+        socket.disconnect();
+        socket.close();
         setLoading(false);
         return;
       }, timeout * 1000);
@@ -33,13 +40,13 @@ export function FetchTweetsRedis() {
   }, []);
 
   useEffect(() => {
-    // setLoading(true);
-    // getRepo();
-    liveStream(["cat", "dog"], 2);
-    // socket.on("data", (data) => setResponse(data));
-  }, [isAgain]);
+    if (keywords !== []) {
+      liveStream(keywords, 1);
+    }
+    // console.log(response);
+  }, [attempt]);
 
   if (response !== []) {
-    return [{ response, loading, error }, setAgain];
+    return [{ response, loading, error }, setAttempt, setKeywords, setResponse];
   }
 }

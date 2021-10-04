@@ -13,11 +13,15 @@ const searchTweets = async (keywords) => {
     existRules = existRules.data ? existRules.data : [];
     /** Add non-existing rules */
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
-    console.log(toAddRules);
-    const ownRules = addRules(toAddRules).then((res) => {
-      myRules = [...myRules, ...res.data];
-      return myRules;
-    });
+    // console.log(toAddRules);
+    const ownRules = addRules(toAddRules)
+      .then((res) => {
+        if (res.data !== undefined) {
+          myRules = [...myRules, ...res.data];
+          return myRules;
+        }
+      })
+      .catch((err) => console.log(err));
     return ownRules;
   } catch (error) {
     console.log(error);
@@ -54,29 +58,33 @@ const addRules = async (rules) => {
 
 const deleteRules = async (rules) => {
   let existedRules = await getRules();
-  existedRules = existedRules.data;
-  const values = rules.map((rule) => rule.value);
-  let ids = [];
-  for (const rule of existedRules) {
-    if (values.includes(rule.value)) {
-      ids.push(rule.id);
+  if (existedRules.data !== undefined) {
+    existedRules = existedRules.data;
+    const values = rules.map((rule) => rule.value);
+    let ids = [];
+    for (const rule of existedRules) {
+      if (values.includes(rule.value)) {
+        ids.push(rule.id);
+      }
     }
-  }
 
-  const body = {
-    delete: { ids },
-  };
-  try {
-    const response = await twitterApiCall(
-      "POST",
-      twitterStreamRules,
-      null,
-      body
-    );
+    const body = {
+      delete: { ids },
+    };
+    try {
+      const response = await twitterApiCall(
+        "POST",
+        twitterStreamRules,
+        null,
+        body
+      );
 
-    return response;
-  } catch (error) {
-    throw error;
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    return { message: "Nothing to delete!" };
   }
 };
 
