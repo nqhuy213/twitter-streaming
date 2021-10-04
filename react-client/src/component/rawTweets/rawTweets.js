@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Reveal } from "react-reveal";
-import { PanelGroup, Panel } from "rsuite";
+// import { PanelGroup, Panel } from "rsuite";
 
 import { Tweet } from "react-twitter-widgets";
 
@@ -16,7 +16,7 @@ export function RawTweets() {
   const [keywords, setKeywords] = useState(["cat", "dog"]);
   const [response, setResponse] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [attempt, setAttempt] = useState(0);
+  // const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState({ status: false, message: "" });
 
   // const [{ response, loading, error }, again, addRules, clear] =
@@ -44,7 +44,7 @@ export function RawTweets() {
       socket.emit("streaming", keywords);
       socket.on("data", (data) => {
         setResponse((prev) => {
-          return [...prev, [data.data, data.includes.users]];
+          return [...prev, [data.data]];
         });
       });
       setTimeout(() => {
@@ -56,7 +56,7 @@ export function RawTweets() {
         socket.close();
         setLoading(false);
         return;
-      }, 1 * 1000);
+      }, 5 * 1000);
     } catch (err) {
       setError(err);
     }
