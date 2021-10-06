@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { Reveal } from "react-reveal";
-import { PanelGroup, Panel } from "rsuite";
 import CreatableSelect from "react-select/creatable";
 
 import { Tweet } from "react-twitter-widgets";
 
 import "./rawTweets.css";
-// import { FetchTweets } from "../../api/api";
 
 import socketio from "socket.io-client";
 
@@ -16,24 +13,17 @@ const url = "http://localhost:3001";
 export function RawTweets() {
   const [keywords, setKeywords] = useState([]);
   const [response, setResponse] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({ status: false, message: "" });
-
-  const handleInput = (e) => {
-    setKeywords(e.target.value);
-    // console.log(e.target.value);
-  };
 
   const handleChange = (newValue, actionMeta) => {
     setKeywords(newValue.map((val) => val.value));
+    console.log(keywords);
   };
-
-  console.log(keywords);
   //adding rules
   const handleAdd = () => {
     try {
       const socket = socketio(url);
-      // console.log(keywords);
       setLoading(true);
       setError(false);
       socket.emit("streaming", keywords);
@@ -41,47 +31,34 @@ export function RawTweets() {
         setResponse((prev) => {
           return [...prev, [data.data]];
         });
+        socket.on("sentimentData", (data) => {
+          console.log(data);
+        });
       });
       setTimeout(() => {
-        // socket.emit("deleteRules", keywords);
-        // socket.off("data"); //stop listening
-
         //disconnect socket
         socket.disconnect();
         socket.close();
         setLoading(false);
         return;
-      }, 5 * 1000);
+      }, 3 * 1000);
     } catch (err) {
       setError(err);
     }
   };
 
   //clear raw tweets
-  // const handleClear = () => {
-  //   clear([]);
-  //   addRules([]);
-  //   setAttempt((prev) => prev++);
-  //   again(attempt);
-  // };
+  const handleClear = () => {
+    console.log(response);
+    setResponse([]);
+  };
 
-  //load more tweets
-  // const handleAgain = () => {
-  //   //after 3 seconds, kill me
-  //   setAttempt((prev) => prev++);
-  //   again(attempt);
-  // };
   return (
     <Container>
       <Form.Group className="mb-3">
         <Row>
           <Form.Label>Adding Rules</Form.Label>
           <Col className="col-search-rule" md={10}>
-            {/* <Form.Control
-              type="rules"
-              placeholder="Adding rules here"
-              onChange={handleInput}
-            /> */}
             <CreatableSelect isMulti onChange={handleChange} />
           </Col>
           <Col md={1} className="col-btn-add">
@@ -91,7 +68,7 @@ export function RawTweets() {
               type="submit"
               onClick={handleAdd}
             >
-              Add
+              Start
             </Button>
           </Col>
           <Col md={1} className="col-btn-add">
@@ -99,7 +76,7 @@ export function RawTweets() {
               className="btn-add"
               variant="primary"
               type="submit"
-              onClick={handleAdd}
+              onClick={handleClear}
             >
               Clear Tweets
             </Button>
@@ -109,13 +86,11 @@ export function RawTweets() {
 
       {response.map((data) => {
         return (
-          <Reveal effect="fadeInUp">
-            <Row className="justify-content-md-center">
-              <Col md={{ offset: 3 }}>
-                <Tweet className="tweet" tweetId={`${data[0].id}`} />
-              </Col>
-            </Row>
-          </Reveal>
+          <Row className="justify-content-md-center">
+            <Col md={{ offset: 3 }}>
+              <Tweet className="tweet" tweetId={`${data[0].id}`} />
+            </Col>
+          </Row>
         );
       })}
       {!loading ? (

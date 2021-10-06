@@ -71,7 +71,10 @@ function connectToServer(url, app) {
           // console.log(data);
 
           app.io.to(stream.socketId).emit("data", data);
-          // app.io.to(stream.socketId).emit("sentimentData", sentimentData);
+          app.io.to(stream.socketId).emit("sentimentData", {
+            sentimentData: sentimentData,
+            createdTime: new Date(data.data.created_at).getTime(),
+          });
           break;
         }
       }

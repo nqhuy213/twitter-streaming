@@ -4,7 +4,7 @@ const needle = require("needle");
 //   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
 
 const twitterStreamUrl =
-  "https://api.twitter.com/2/tweets/search/stream?&expansions=author_id&user.fields=name";
+  "https://api.twitter.com/2/tweets/search/stream?&&tweet.fields=created_at";
 
 function registerStream(app) {
   const stream = needle.get(twitterStreamUrl, {

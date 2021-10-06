@@ -17,6 +17,7 @@ function registerSocket(server, app) {
     try {
       socket.on("streaming", async (keywords) => {
         /** Store socket and keywords in db */
+        console.log(keywords);
         const ownRules = await searchTweets(keywords);
         const Stream = app.db.Stream;
         const newStream = new Stream({ socketId: socket.id, rules: ownRules });
