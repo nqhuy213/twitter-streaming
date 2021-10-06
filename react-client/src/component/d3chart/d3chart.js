@@ -8,20 +8,21 @@ import socketio from "socket.io-client";
 //url
 const url = "http://localhost:3001";
 
-export default function D3Chart(props) {
-  const ref = useRef();
+export default function D3Chart() {
   const [keywords, setKeywords] = useState([]);
+  const ref = useRef();
   const [response, setResponse] = useState([]);
   const [timeDomain, setTimeDomain] = useState([]);
 
   //handle change
   const handleChange = (newValue, actionMeta) => {
+    newValue.map((val) => console.log(val.label));
     setKeywords(newValue.map((val) => val.value));
     console.log(keywords);
   };
 
   //get sentiment data
-  const handleSentiment = useCallback(() => {
+  const handleSentiment = () => {
     try {
       const socket = socketio(url);
       socket.emit("streaming", keywords);
@@ -42,7 +43,7 @@ export default function D3Chart(props) {
     } catch (err) {
       console.log(err);
     }
-  }, []);
+  };
 
   //margin, width, height
   const margin = { top: 10, right: 30, bottom: 30, left: 60 },
@@ -129,6 +130,7 @@ export default function D3Chart(props) {
 
     yAxis();
     updateChart();
+    console.log(response);
 
     //update every time if catch new data
   }, [response]);
@@ -139,7 +141,11 @@ export default function D3Chart(props) {
         <Row>
           <Form.Label>Sentiment Analysis</Form.Label>
           <Col className="col-search-rule" md={10}>
-            <CreatableSelect isMulti onChange={handleChange} />
+            <CreatableSelect
+              isMulti
+              placeholder="Add rules here"
+              onChange={handleChange}
+            />
           </Col>
           <Col md={2} className="col-btn-add">
             <Button variant="primary" onClick={handleSentiment}>
