@@ -46,14 +46,14 @@ function connectToServer(url, app) {
           // redis.sadd("stream:tweets", JSON.stringify(data));
 
           /** Redis stream */
-          redisClient.xadd(
-            "example",
-            "MAXLEN",
-            1000000,
-            "*",
-            "rawTweet",
-            JSON.stringify(data.data)
-          );
+          // redisClient.xadd(
+          //   "example",
+          //   "MAXLEN",
+          //   1000000,
+          //   "*",
+          //   "rawTweet",
+          //   JSON.stringify(data.data)
+          // );
           // console.log("hello");
           // // Get tweet
           // redis.lrange("stream:tweets", 0, -1, function (err, tweets) {
@@ -71,10 +71,20 @@ function connectToServer(url, app) {
           // console.log(data);
 
           app.io.to(stream.socketId).emit("data", data);
-          app.io.to(stream.socketId).emit("sentimentData", {
+          /** Save historical data into database */
+          const sentiment = {
+            tweetId: data.data.id,
             sentimentData: sentimentData,
             createdTime: new Date(data.data.created_at).getTime(),
-          });
+          };
+          await app.db.History.updateOne(
+            {
+              clientId: stream.clientId,
+            },
+            { $push: { data: sentiment } }
+          );
+
+          app.io.to(stream.socketId).emit("sentimentData", sentiment);
           break;
         }
       }

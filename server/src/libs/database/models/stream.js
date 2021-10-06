@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const StreamSchema = mongoose.Schema({
   socketId: String,
+  clientId: String,
   rules: Array,
 });
 

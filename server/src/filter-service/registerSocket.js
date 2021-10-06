@@ -15,13 +15,32 @@ function registerSocket(server, app) {
     app.clientConnectionIds.add(socket.id);
     console.log(`Socket ${socket.id} connected.`);
     try {
-      socket.on("streaming", async (keywords) => {
+      /** Send client ID along with the keywords */
+      socket.on("streaming", async ({ clientId, keywords }) => {
         /** Store socket and keywords in db */
-        console.log(keywords);
         const ownRules = await searchTweets(keywords);
         const Stream = app.db.Stream;
-        const newStream = new Stream({ socketId: socket.id, rules: ownRules });
+        const newStream = new Stream({
+          socketId: socket.id,
+          rules: ownRules,
+          clientId: clientId,
+        });
         await newStream.save();
+
+        /** Store the client Id with its rules in the History Model */
+        const history = await app.db.History.findOne({ clientId: clientId });
+        /** Already exists in the database*/
+        if (history) {
+          history.rules = [...new Set([...history.rules, ...keywords])];
+          await history.save();
+        } else {
+          /** Not exists, create new one */
+          const newHistory = new app.db.History({
+            clientId: clientId,
+            rules: keywords,
+          });
+          await newHistory.save();
+        }
       });
 
       socket.on("disconnect", async function () {
