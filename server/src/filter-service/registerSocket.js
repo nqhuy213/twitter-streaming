@@ -16,7 +16,7 @@ function registerSocket(server, app) {
     console.log(`Socket ${socket.id} connected.`);
     try {
       /** Send client ID along with the keywords */
-      socket.on("streaming", async ({ clientId, keywords, from, to }) => {
+      socket.on("streaming", async ({ clientId, keywords }) => {
         /** Store socket and keywords in db */
         const ownRules = await searchTweets(keywords);
         const Stream = app.db.Stream;
