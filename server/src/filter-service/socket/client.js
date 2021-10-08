@@ -4,8 +4,6 @@ const naturalAnalyseText = require("../analysis/naturalAnalysis");
 //redis
 var redis = require("redis");
 require("redis-streams")(redis);
-var redisWStream = require("redis-wstream"); // factory
-var client = redis.createClient();
 
 var redisClient = redis.createClient();
 
@@ -70,6 +68,7 @@ function connectToServer(url, app) {
           // });
           // console.log(data);
 
+          console.log(stream);
           app.io.to(stream.socketId).emit("data", data);
           /** Save historical data into database */
           const sentiment = {
@@ -80,6 +79,7 @@ function connectToServer(url, app) {
           await app.db.History.updateOne(
             {
               clientId: stream.clientId,
+              rules: stream.rules.map((rule) => rule.value),
             },
             { $push: { data: sentiment } }
           );

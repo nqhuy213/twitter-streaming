@@ -16,7 +16,7 @@ function registerSocket(server, app) {
     console.log(`Socket ${socket.id} connected.`);
     try {
       /** Send client ID along with the keywords */
-      socket.on("streaming", async ({ clientId, keywords }) => {
+      socket.on("streaming", async ({ clientId, keywords, from, to }) => {
         /** Store socket and keywords in db */
         const ownRules = await searchTweets(keywords);
         const Stream = app.db.Stream;
@@ -28,16 +28,24 @@ function registerSocket(server, app) {
         await newStream.save();
 
         /** Store the client Id with its rules in the History Model */
-        const history = await app.db.History.findOne({ clientId: clientId });
+        const history = await app.db.History.findOne({
+          clientId: clientId,
+          rules: keywords.map((keyword) => keyword + " lang:en"),
+        });
         /** Already exists in the database*/
         if (history) {
-          history.rules = [...new Set([...history.rules, ...keywords])];
+          history.rules = [
+            ...new Set([
+              ...history.rules,
+              ...keywords.map((keyword) => keyword + " lang:en"),
+            ]),
+          ];
           await history.save();
         } else {
           /** Not exists, create new one */
           const newHistory = new app.db.History({
             clientId: clientId,
-            rules: keywords,
+            rules: keywords.map((keyword) => keyword + " lang:en"),
           });
           await newHistory.save();
         }

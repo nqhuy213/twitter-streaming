@@ -1,24 +1,29 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
-
 import { Tweet } from "react-twitter-widgets";
-
 import "./rawTweets.css";
-
 import socketio from "socket.io-client";
+import { UuidContext } from "../../uuid/uuid";
 
+//url
 const url = "http://localhost:3001";
 
 export function RawTweets() {
+  //states
   const [keywords, setKeywords] = useState([]);
   const [response, setResponse] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState({ status: false, message: "" });
 
+  //uuid
+  const { uuid, uuidError } = useContext(UuidContext);
+
   const handleChange = (newValue, actionMeta) => {
+    // console.log(newValue);
     setKeywords(newValue.map((val) => val.value));
-    console.log(keywords);
+    // console.log(keywords);
   };
   //adding rules
   const handleAdd = () => {
@@ -26,7 +31,7 @@ export function RawTweets() {
       const socket = socketio(url);
       setLoading(true);
       setError(false);
-      socket.emit("streaming", keywords);
+      socket.emit("streaming", { clientId: uuid, keywords });
       socket.on("data", (data) => {
         setResponse((prev) => {
           return [...prev, [data.data]];
@@ -63,7 +68,7 @@ export function RawTweets() {
           </Col>
           <Col md={1} className="col-btn-add">
             <Button
-              className="btn-add"
+              className="btn-add btn-sm"
               variant="primary"
               type="submit"
               onClick={handleAdd}
@@ -73,7 +78,7 @@ export function RawTweets() {
           </Col>
           <Col md={1} className="col-btn-add">
             <Button
-              className="btn-add"
+              className="btn-add btn-sm"
               variant="primary"
               type="submit"
               onClick={handleClear}

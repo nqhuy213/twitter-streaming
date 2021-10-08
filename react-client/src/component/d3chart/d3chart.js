@@ -1,31 +1,49 @@
 import * as d3 from "d3";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Container, Button } from "react-bootstrap";
 import { Form, Row, Col } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
 import socketio from "socket.io-client";
+import { UuidContext } from "../../uuid/uuid";
+import { InputNumber } from "rsuite";
+import "./d3chart.css";
 
 //url
 const url = "http://localhost:3001";
 
 export default function D3Chart() {
+  //states
   const [keywords, setKeywords] = useState([]);
-  const ref = useRef();
   const [response, setResponse] = useState([]);
   const [timeDomain, setTimeDomain] = useState([]);
+  const [seconds, setSeconds] = useState(5);
+
+  //uuid
+  const { uuid, error } = useContext(UuidContext);
+
+  //ref for svg
+  const ref = useRef();
 
   //handle change
   const handleChange = (newValue, actionMeta) => {
-    newValue.map((val) => console.log(val.label));
     setKeywords(newValue.map((val) => val.value));
-    console.log(keywords);
+  };
+
+  const handleSecond = (e) => {
+    // console.log(e);
+    setSeconds(e);
   };
 
   //get sentiment data
   const handleSentiment = () => {
+    setResponse([]);
+    setTimeDomain([]);
     try {
+      //clear response
+
       const socket = socketio(url);
-      socket.emit("streaming", keywords);
+      //emit uuid and keyowrds to streaming
+      socket.emit("streaming", { clientId: uuid, keywords });
       socket.on("sentimentData", (data) => {
         // console.log(data);
         setResponse((prev) => [...prev, data]);
@@ -39,7 +57,7 @@ export default function D3Chart() {
         socket.disconnect();
         socket.close();
         return;
-      }, 5 * 1000);
+      }, seconds * 1000);
     } catch (err) {
       console.log(err);
     }
@@ -110,7 +128,7 @@ export default function D3Chart() {
               // console.log(d);
               return y(d.sentimentData);
             })
-            .attr("r", 10)
+            .attr("r", 5)
             .transition()
             .duration(500);
         });
@@ -130,7 +148,6 @@ export default function D3Chart() {
 
     yAxis();
     updateChart();
-    console.log(response);
 
     //update every time if catch new data
   }, [response]);
@@ -147,7 +164,17 @@ export default function D3Chart() {
               onChange={handleChange}
             />
           </Col>
-          <Col md={2} className="col-btn-add">
+          <Col md={1} className="col-btn-add">
+            <div style={{ width: 100 }}>
+              <InputNumber
+                defaultValue={5}
+                min={0}
+                max={60}
+                onChange={handleSecond}
+              />
+            </div>
+          </Col>
+          <Col md={1} className="col-btn-add">
             <Button variant="primary" onClick={handleSentiment}>
               Stream
             </Button>

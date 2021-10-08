@@ -30,20 +30,21 @@
 }
 
 .btn-add {
-  padding: 0px 0px 0px 0px;
   width: 100%;
+  font-size: small !important;
 }
 
 .col-btn-add {
-  padding: 0px 0px 0px 0px !important;
+  padding: 0px 5px 0px 5px !important;
 }
 
 .col-btn-add .btn {
   height: 100%;
-  border-radius: 0 !important;
+  border-radius: 50 !important;
 }
 
 .col-search-rule {
+  height: 100%;
   padding: 0px 0px 0px 0px !important;
 }
 .col-search-rule .form-control {
@@ -52,6 +53,10 @@
 
 .col-search-rule .form-control:focus {
   border-right-style: none !important;
+}
+
+.css-1s2u09g-control {
+  height: 100% !important;
 }
 
 /* ----spinner---- */

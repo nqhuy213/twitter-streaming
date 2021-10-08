@@ -4,16 +4,16 @@ const registerMiddlewares = require("./registerMiddlewares");
 const { registerSocket, deregisterAllSockets } = require("./registerSocket");
 const connect = require("./socket/client");
 const registerDatabase = require("../libs/database/registerDatabase");
-const mongoose = require("mongoose");
-const io = require("socket.io-client");
-const ioserver = require("socket.io");
-const { deleteAllRules } = require("../libs/api");
+const { v4: uuidv4 } = require("uuid");
+const redis = require("redis");
+
+//  create redis client and connect to redis server
+const redis_url = process.env.REDIS_URL || "redis://127.0.0.1";
+const redis_client = redis.createClient(redis_url);
 
 if (process.env.NODE_ENV === "development") {
   require("dotenv").config();
 }
-
-const redis = require("redis").createClient();
 
 function createApp() {
   const app = express();
@@ -37,70 +37,49 @@ function startApp() {
     });
   });
 
-  // app.post("/stream/live", async (req, res, next) => {
-  //   //body
-  //   const keywords = req.body.keywords;
-  //   const timeout = req.body.timeout;
-  //   const hostname = `http://${req.headers.host}`;
-
-  //   //save stream in redis
-  //   //socket
-  //   const socket = io(hostname);
-  //   socket.emit("streaming", keywords);
-  //   socket.on("data", (data) => {
-  //     // console.log(data);
-
-  //     // Publish it
-  //     redis.publish("tweets", JSON.stringify(data));
-
-  //     // Persist it to a Redis list
-  //     redis.rpush("stream:tweets", JSON.stringify(data));
-  //   });
-  //   setInterval(() => {
-  //     socket.disconnect();
-  //     socket.close();
-  //   }, timeout * 1000);
-
-  //   res.status(200).send({ message: "ok" });
-  // });
-
-  //get the tweets which are already stored in cache
-  app.get(
-    "/getTweetsCache",
-    (req, res, next) => {
-      // res.setHeader("Content-Type", "text/html; charset=utf-8");
-      // res.setHeader("Transfer-Encoding", "chunked");
-      var BreakException = {};
-      // Get tweets from redis
-      // redis.smembers("stream:tweets", function (err, tweets) {
-      //   if (err) {
-      //     console.log(err);
-      //   } else {
-      //     // Get 10 tweets
-      //     let tweet_list = [];
-      //     try {
-      //       tweets.forEach(function (tweet, i) {
-      //         tweet_list.push(JSON.parse(tweet));
-      //         if (i > 9) {
-      //           throw BreakException;
-      //         }
-      //       });
-      //     } catch (e) {
-      //       if (e !== BreakException) throw e;
-      //     }
-
-      redis.xread("count", "100", "streams", "example", "0", (err, results) => {
-        return res.status(200).send(
-          results[0][1].map((result) => {
-            return JSON.parse(result[1][1]);
-          })
-        );
-      });
-      // return res.status(200).send(tweet_list);
+  // server send uuid to client
+  app.get("/getUuid", (req, res, next) => {
+    try {
+      //create uuid and send back to client
+      return res.status(200).send(uuidv4());
+    } catch (err) {
+      //if error
+      return res
+        .status(400)
+        .send({ message: "Failed to create UUID", error: true });
     }
-    // });
-    // }
-  );
+  });
+
+  //get all data in mongodb
+  app.get("/getAllTweets", (req, res, next) => {
+    //query
+    const uuid = req.query.uuid;
+
+    //redis key
+    const redisKey = `redis-${uuid}`;
+
+    //try get data from redis
+    return redis_client.get(redisKey, async (err, result) => {
+      //if there is result
+      if (result) {
+        const resultJSON = JSON.parse(result);
+        return res.status(200).json(resultJSON);
+      } else {
+        //else get from mongo
+        const data = await app.db.History.find({ clientId: uuid });
+        console.log("Start Here!");
+        console.log(data);
+        console.log("Start Here!");
+
+        redis_client.setex(
+          redisKey,
+          3600,
+          JSON.stringify({ source: "Redis Cache", data })
+        );
+        return res.status(200).json({ source: "MongoDB", data });
+      }
+    });
+  });
 }
 
 startApp();

@@ -3,11 +3,15 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { UuidProvider } from "./uuid/uuid";
+import "rsuite/dist/rsuite.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <UuidProvider>
+      <App />
+    </UuidProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
