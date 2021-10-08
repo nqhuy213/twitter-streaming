@@ -6,6 +6,7 @@ const {
 } = require("../../libs/api");
 const { successResponse, errorResponse } = require("../../libs/utils");
 const { v4: uuidv4 } = require("uuid");
+const getRedisKey = require("../redis/getRedisKey");
 
 class Controller {
   constructor(app) {
@@ -72,7 +73,7 @@ class Controller {
   getAllTweets = async (req, res, next) => {
     const uuid = req.query.uuid;
     //redis key
-    const redisKey = `redis-${uuid}`;
+    const redisKey = getRedisKey(uuid);
 
     //try get data from redis
     return this.app.redisClient.get(redisKey, async (err, result) => {
@@ -82,12 +83,14 @@ class Controller {
         return res.status(200).json(resultJSON);
       } else {
         //else get from mongo
-        const data = await app.db.History.find({ clientId: uuid });
-        this.app.redisClient.setex(
-          redisKey,
-          3600,
-          JSON.stringify({ source: "Redis Cache", data })
-        );
+        const data = await this.app.db.History.find({ clientId: uuid });
+        if (data.length > 0) {
+          this.app.redisClient.setex(
+            redisKey,
+            3600,
+            JSON.stringify({ source: "Redis Cache", data })
+          );
+        }
         return res.status(200).json({ source: "MongoDB", data });
       }
     });

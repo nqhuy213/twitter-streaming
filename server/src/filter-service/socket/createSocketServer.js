@@ -1,4 +1,5 @@
 const { searchTweets, deleteRules } = require("../../libs/api");
+const getRedisKey = require("../redis/getRedisKey");
 
 //global set
 const connections = new Set();
@@ -18,6 +19,14 @@ function createSocketServer(server, app) {
     console.log(`Socket ${socket.id} connected.`);
     /** Send client ID along with the keywords */
     socket.on("streaming", async ({ clientId, keywords }) => {
+      /** Flush all history from the redis client */
+      app.redisClient.del(getRedisKey(clientId), (err, response) => {
+        if (response === 1) {
+          console.log(`Delete key ${getRedisKey(clientId)}`);
+        } else {
+          console.log(`Cannot delete redis key`);
+        }
+      });
       /** Store socket and keywords in db */
       const ownRules = await searchTweets(keywords);
       const Stream = app.db.Stream;
