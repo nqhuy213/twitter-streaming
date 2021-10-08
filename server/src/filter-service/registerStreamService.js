@@ -1,14 +1,7 @@
 const io = require("socket.io-client");
-const naturalAnalyseText = require("../analysis/naturalAnalysis");
+const naturalAnalyseText = require("./analysis/naturalAnalysis");
 
-//redis
-var redis = require("redis");
-require("redis-streams")(redis);
-
-var redisClient = redis.createClient();
-
-//connect to the server
-function connectToServer(url, app) {
+function registerStreamService(url, app) {
   const socket = io(url);
   socket.on("connect", () => {
     console.log("Stream socket connected");
@@ -34,7 +27,7 @@ function connectToServer(url, app) {
             sentimentData: sentimentData,
             createdTime: new Date(data.data.created_at).getTime(),
           };
-
+          /** Updating history data in database */
           app.db.History.updateOne(
             {
               clientId: stream.clientId,
@@ -58,4 +51,4 @@ function connectToServer(url, app) {
   });
 }
 
-module.exports = connectToServer;
+module.exports = registerStreamService;

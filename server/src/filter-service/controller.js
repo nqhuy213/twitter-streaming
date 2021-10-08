@@ -5,6 +5,7 @@ const {
   addRules,
 } = require("../libs/api");
 const { successResponse, errorResponse } = require("../libs/utils");
+const { v4: uuidv4 } = require("uuid");
 
 class Controller {
   constructor(app) {
@@ -54,6 +55,42 @@ class Controller {
     } catch (error) {
       errorResponse(res, 500, error.message);
     }
+  };
+
+  getUserId = (req, res, next) => {
+    try {
+      //create uuid and send back to client
+      return res.status(200).send(uuidv4());
+    } catch (err) {
+      //if error
+      return res
+        .status(400)
+        .send({ message: "Failed to create UUID", error: true });
+    }
+  };
+
+  getAllTweets = async (req, res, next) => {
+    const uuid = req.query.uuid;
+    //redis key
+    const redisKey = `redis-${uuid}`;
+
+    //try get data from redis
+    return this.app.redisClient.get(redisKey, async (err, result) => {
+      //if there is result
+      if (result) {
+        const resultJSON = JSON.parse(result);
+        return res.status(200).json(resultJSON);
+      } else {
+        //else get from mongo
+        const data = await app.db.History.find({ clientId: uuid });
+        this.app.redisClient.setex(
+          redisKey,
+          3600,
+          JSON.stringify({ source: "Redis Cache", data })
+        );
+        return res.status(200).json({ source: "MongoDB", data });
+      }
+    });
   };
 }
 

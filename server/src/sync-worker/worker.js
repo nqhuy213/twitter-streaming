@@ -5,6 +5,9 @@ if (process.env.NODE_ENV === "development") {
   require("dotenv").config();
 }
 
+/** Worker to synchronize streaming rules in Twitter API
+ * and rules cerated by clients.
+ */
 function run() {
   const app = {};
   registerDatabase(app);
@@ -24,7 +27,7 @@ function run() {
           }
         }
       }
-      const added = await addRules(missingRules);
+      await addRules(missingRules);
       if (missingRules.length > 0) {
         console.log(missingRules);
       }
