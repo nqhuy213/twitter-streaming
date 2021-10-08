@@ -1,5 +1,5 @@
 const {
-  searchTweets,
+  getMyOwnRules,
   getRules,
   deleteRules,
   addRules,
@@ -17,7 +17,7 @@ class Controller {
     try {
       const { keywords, socket } = req.body;
       // console.log(keywords);
-      const ownRules = await searchTweets(keywords);
+      const ownRules = await getMyOwnRules(keywords);
 
       /** Store the socket with the specific rules */
       const newStream = new this.app.db.Stream({ socket, rules: ownRules });

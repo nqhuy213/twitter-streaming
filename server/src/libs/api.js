@@ -9,7 +9,7 @@ const twitterStreamRules =
   "https://api.twitter.com/2/tweets/search/stream/rules";
 
 /**Add rules into Twitter API, ignore existing rules */
-const searchTweets = async (keywords) => {
+const getMyOwnRules = async (keywords) => {
   try {
     let existRules = await getRules();
     existRules = existRules.data ? existRules.data : [];
@@ -147,7 +147,7 @@ const deleteAllRules = async () => {
 };
 
 module.exports = {
-  searchTweets,
+  getMyOwnRules,
   getStream,
   getRules,
   deleteRules,
