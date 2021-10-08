@@ -1,4 +1,4 @@
-const { searchTweets, deleteRules } = require("../libs/api");
+const { searchTweets, deleteRules } = require("../../libs/api");
 
 //global set
 const connections = new Set();

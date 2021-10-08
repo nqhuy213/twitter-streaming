@@ -1,5 +1,5 @@
 const io = require("socket.io-client");
-const naturalAnalyseText = require("./analysis/naturalAnalysis");
+const naturalAnalyseText = require("../analysis/naturalAnalysis");
 
 function registerStreamService(url, app) {
   const socket = io(url);

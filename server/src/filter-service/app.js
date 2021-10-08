@@ -1,13 +1,13 @@
 const express = require("express");
-const registerRoutes = require("./registerRoutes");
-const registerMiddlewares = require("./registerMiddlewares");
+const registerRoutes = require("./routes/registerRoutes");
+const registerMiddlewares = require("./middlewares/registerMiddlewares");
 const {
   createSocketServer,
   deregisterAllSockets,
-} = require("./createSocketServer");
-const registerStreamService = require("./registerStreamService");
+} = require("./socket/createSocketServer");
+const registerStreamService = require("./services/registerStreamService");
 const registerDatabase = require("../libs/database/registerDatabase");
-const registerRedis = require("./registerRedis");
+const registerRedis = require("./redis/registerRedis");
 
 if (process.env.NODE_ENV === "development") {
   require("dotenv").config();

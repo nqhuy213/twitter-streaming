@@ -3,8 +3,8 @@ const {
   getRules,
   deleteRules,
   addRules,
-} = require("../libs/api");
-const { successResponse, errorResponse } = require("../libs/utils");
+} = require("../../libs/api");
+const { successResponse, errorResponse } = require("../../libs/utils");
 const { v4: uuidv4 } = require("uuid");
 
 class Controller {

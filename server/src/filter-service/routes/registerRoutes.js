@@ -1,4 +1,4 @@
-const Controller = require("./controller");
+const Controller = require("../controller");
 
 function registerRoutes(app) {
   const ctrl = new Controller(app);

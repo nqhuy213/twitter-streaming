@@ -1,3 +1,4 @@
+/** This module is to integrate with Twitter API */
 const axios = require("axios").default;
 const needle = require("needle");
 const { rulesConstructor } = require("../libs/utils");
@@ -7,13 +8,13 @@ const twitterStreamUrl =
 const twitterStreamRules =
   "https://api.twitter.com/2/tweets/search/stream/rules";
 
+/**Add rules into Twitter API, ignore existing rules */
 const searchTweets = async (keywords) => {
   try {
     let existRules = await getRules();
     existRules = existRules.data ? existRules.data : [];
     /** Add non-existing rules */
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
-    // console.log(toAddRules);
     const ownRules = addRules(toAddRules)
       .then((res) => {
         if (res.data !== undefined) {
