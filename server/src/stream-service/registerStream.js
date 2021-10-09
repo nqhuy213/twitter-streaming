@@ -18,7 +18,7 @@ function registerStream(app) {
       /** Emit the raw Tweets data to all socket clients */
       try {
         const tweet = JSON.parse(data);
-        // console.log(tweet.includes.users[0]);
+        console.log(tweet);
         app.io.emit("data", tweet);
       } catch (error) {}
     })

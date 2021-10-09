@@ -8,23 +8,16 @@ const UuidContext = createContext();
 //get the uuid from the server
 const UuidProvider = (props) => {
   const url = "http://localhost:3001/getUuid";
-  const [uuid, setUuid] = useState();
-  const [error, setError] = useState(false);
+  const [uuid, setUuid] = useState("");
+  const [error, setError] = useState({ status: false, message: "" });
 
+  const getRepo = async () => {
+    await axios
+      .get(url)
+      .then((res) => setUuid(res.data))
+      .catch((err) => setError({ status: true, message: err.data }));
+  };
   useEffect(() => {
-    const getRepo = async () => {
-      try {
-        const res = await axios.get(url);
-        if (res.statusText === "OK") {
-          console.log(res.data);
-          setUuid(res.data);
-        } else {
-          setError(res.data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
     getRepo();
   }, [error]);
 

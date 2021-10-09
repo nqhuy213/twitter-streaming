@@ -70,7 +70,7 @@ class Controller {
     }
   };
 
-  getAllTweets = async (req, res, next) => {
+  getAllRules = async (req, res, next) => {
     const uuid = req.query.uuid;
     //redis key
     const redisKey = getRedisKey(uuid);
@@ -84,14 +84,68 @@ class Controller {
       } else {
         //else get from mongo
         const data = await this.app.db.History.find({ clientId: uuid });
+        console.log(data);
         if (data.length > 0) {
           this.app.redisClient.setex(
             redisKey,
             3600,
-            JSON.stringify({ source: "Redis Cache", data })
+            JSON.stringify({
+              source: "Redis Cache",
+              clientId: data[0].clientId,
+              rules: data.map((data) => ({
+                label: data.rules.map((data) => data.replace(" lang:en", " ")),
+                value: data.rules,
+              })),
+            })
           );
         }
-        return res.status(200).json({ source: "MongoDB", data });
+        return res.status(200).json({
+          source: "MongoDB",
+          clientId: data[0].clientId,
+          rules: data.map((data) => ({
+            label: data.rules.map((data) => data.replace(" lang:en", " ")),
+            value: data.rules,
+          })),
+        });
+      }
+    });
+  };
+
+  getTweets = async (req, res, next) => {
+    //uuid
+    const uuid = req.query.uuid;
+    const rules = req.query.rules;
+    //redis key
+    const redisKey = getRedisKey(`${uuid}-${rules}`);
+
+    console.log(rules.split(","));
+    //try get data from redis
+    return this.app.redisClient.get(redisKey, async (err, result) => {
+      //if there is result
+      if (result) {
+        const resultJSON = JSON.parse(result);
+        return res.status(200).json(resultJSON);
+      } else {
+        //else get from mongo
+        const data = await this.app.db.History.find({
+          clientId: uuid,
+          rules: rules.split(","),
+        });
+        console.log(data);
+        if (data.length > 0) {
+          this.app.redisClient.setex(
+            redisKey,
+            3600,
+            JSON.stringify({
+              source: "Redis Cache",
+              data,
+            })
+          );
+        }
+        return res.status(200).json({
+          source: "MongoDB",
+          data,
+        });
       }
     });
   };

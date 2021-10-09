@@ -145,3 +145,9 @@
     transform: rotate(360deg);
   }
 }
+
+.sentiment-chart {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 20px;
+}

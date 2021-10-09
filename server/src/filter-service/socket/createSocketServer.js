@@ -1,4 +1,4 @@
-const { searchTweets, deleteRules } = require("../../libs/api");
+const { getMyOwnRules, deleteRules } = require("../../libs/api");
 const getRedisKey = require("../redis/getRedisKey");
 
 //global set
@@ -22,7 +22,7 @@ function createSocketServer(server, app) {
       /** Flush all history from the redis client */
       app.redisClient.del(getRedisKey(clientId));
       /** Store socket and keywords in db */
-      const ownRules = await searchTweets(keywords);
+      const ownRules = await getMyOwnRules(keywords);
       const Stream = app.db.Stream;
       const newStream = new Stream({
         socketId: socket.id,

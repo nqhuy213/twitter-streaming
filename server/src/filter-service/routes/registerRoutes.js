@@ -10,8 +10,11 @@ function registerRoutes(app) {
   /** User id */
   app.get("/getUuid", ctrl.getUserId);
 
+  /** Get history rules data */
+  app.get("/getAllRules", ctrl.getAllRules);
+
   /** Get history data */
-  app.get("/getAllTweets", ctrl.getAllTweets);
+  app.get("/getTweets", ctrl.getTweets);
 }
 
 module.exports = registerRoutes;

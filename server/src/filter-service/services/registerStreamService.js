@@ -19,27 +19,50 @@ function registerStreamService(url, app) {
         if (matchingRules.includes(streamRule.id)) {
           /** Natural analysis is here */
           /** Send data to that streaming client socket */
-          let sentimentData = await naturalAnalyseText(data.data.text);
+          // let sentimentData = await naturalAnalyseText(data.data.text);
 
           /** Save historical data into database */
-          const sentiment = {
-            tweetId: data.data.id,
-            sentimentData: sentimentData,
-            createdTime: new Date(data.data.created_at).getTime(),
-          };
-          /** Updating history data in database */
-          app.db.History.updateOne(
-            {
-              clientId: stream.clientId,
-              rules: {
-                $all: stream.rules.map((rule) => rule.value),
-                $size: stream.rules.length,
+          await naturalAnalyseText(data.data.text).then((sentimentData) => {
+            const sentiment = {
+              tweetId: data.data.id,
+              sentimentData: sentimentData,
+              createdTime: new Date(data.data.created_at).getTime(),
+            };
+            /** Updating history data in database */
+            app.db.History.updateOne(
+              {
+                clientId: stream.clientId,
+                rules: {
+                  $all: stream.rules.map((rule) => rule.value),
+                  $size: stream.rules.length,
+                },
               },
-            },
-            { $push: { data: sentiment } }
-          ).then(() => {
-            app.io.to(stream.socketId).emit("data", data);
-            app.io.to(stream.socketId).emit("sentimentData", sentiment);
+              { $push: { data: sentiment } }
+            ).then(() => {
+              app.io
+                .to(stream.socketId)
+                .emit("data", { data: data, sentiment: sentiment });
+            });
+            // const sentiment = {
+            //   tweetId: data.data.id,
+            //   sentimentData: sentimentData,
+            //   createdTime: new Date(data.data.created_at).getTime(),
+            // };
+            // /** Updating history data in database */
+            // app.db.History.updateOne(
+            //   {
+            //     clientId: stream.clientId,
+            //     rules: {
+            //       $all: stream.rules.map((rule) => rule.value),
+            //       $size: stream.rules.length,
+            //     },
+            //   },
+            //   { $push: { data: sentiment } }
+            // ).then(() => {
+            //   app.io
+            //     .to(stream.socketId)
+            //     .emit("data", { data: data, sentiment: sentiment });
+            // app.io.to(stream.socketId).emit("sentimentData", sentiment);
           });
           break;
         }

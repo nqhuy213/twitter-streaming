@@ -2,10 +2,10 @@ import "./App.css";
 import { useState } from "react";
 import { RawTweets } from "./component/rawTweets/rawTweets";
 import { Container, Tab, Tabs } from "react-bootstrap";
-import D3Chart from "./component/d3chart/d3chart";
+import History from "./component/history/history";
 
 function App() {
-  const [key, setKey] = useState("raw-tweets");
+  const [key, setKey] = useState("streaming");
 
   return (
     <div className="App">
@@ -21,11 +21,11 @@ function App() {
           onSelect={(k) => setKey(k)}
           className="mb-3"
         >
-          <Tab eventKey="raw-tweets" title="Raw Tweets">
+          <Tab eventKey="streaming" title="Streaming">
             <RawTweets />
           </Tab>
-          <Tab eventKey="sen-chart" title="Profile">
-            <D3Chart />
+          <Tab eventKey="history" title="History">
+            <History />
           </Tab>
         </Tabs>
       </Container>
