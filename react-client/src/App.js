@@ -1,12 +1,12 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { RawTweets } from "./component/rawTweets/rawTweets";
 import { Container, Tab, Tabs } from "react-bootstrap";
 import History from "./component/history/history";
-
+import { UuidContext } from "./uuid/uuid";
 function App() {
   const [key, setKey] = useState("streaming");
-
+  const { uuid, uuidError } = useContext(UuidContext);
   return (
     <div className="App">
       {/* <UuidContext.Provider value={{ uuid: uuid, error: error }}> */}
@@ -25,7 +25,7 @@ function App() {
             <RawTweets />
           </Tab>
           <Tab eventKey="history" title="History">
-            <History />
+            {uuid ? <History /> : null}
           </Tab>
         </Tabs>
       </Container>

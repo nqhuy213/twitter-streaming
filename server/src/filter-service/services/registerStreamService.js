@@ -30,12 +30,8 @@ function registerStreamService(url, app) {
               createdTime: new Date(data.data.created_at).getTime(),
             };
 
-            app.io
-              .to(stream.socketId)
-              .emit("data", { data: data, sentiment: sentiment });
-
             /** Updating history data in database */
-            await app.db.History.updateOne(
+            app.db.History.updateOne(
               {
                 clientId: stream.clientId,
                 rules: {
@@ -44,7 +40,11 @@ function registerStreamService(url, app) {
                 },
               },
               { $push: { data: sentiment } }
-            );
+            ).then(() => {
+              app.io
+                .to(stream.socketId)
+                .emit("data", { data: data, sentiment: sentiment });
+            });
             // const sentiment = {
             //   tweetId: data.data.id,
             //   sentimentData: sentimentData,
