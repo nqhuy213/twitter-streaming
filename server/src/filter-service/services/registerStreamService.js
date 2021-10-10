@@ -22,14 +22,20 @@ function registerStreamService(url, app) {
           // let sentimentData = await naturalAnalyseText(data.data.text);
 
           /** Save historical data into database */
-          await naturalAnalyseText(data.data.text).then((sentimentData) => {
+          naturalAnalyseText(data.data.text).then(async (sentimentData) => {
             const sentiment = {
               tweetId: data.data.id,
+              // text:
               sentimentData: sentimentData,
               createdTime: new Date(data.data.created_at).getTime(),
             };
+
+            app.io
+              .to(stream.socketId)
+              .emit("data", { data: data, sentiment: sentiment });
+
             /** Updating history data in database */
-            app.db.History.updateOne(
+            await app.db.History.updateOne(
               {
                 clientId: stream.clientId,
                 rules: {
@@ -38,11 +44,7 @@ function registerStreamService(url, app) {
                 },
               },
               { $push: { data: sentiment } }
-            ).then(() => {
-              app.io
-                .to(stream.socketId)
-                .emit("data", { data: data, sentiment: sentiment });
-            });
+            );
             // const sentiment = {
             //   tweetId: data.data.id,
             //   sentimentData: sentimentData,

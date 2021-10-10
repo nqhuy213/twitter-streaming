@@ -15,7 +15,6 @@ const url = "http://localhost:3001";
 export function RawTweets() {
   //states
   const [keywords, setKeywords] = useState([]);
-  const [response, setResponse] = useState([]);
   const [sentimentData, setSentimentData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [timeDomain, setTimeDomain] = useState([]);
@@ -46,9 +45,10 @@ export function RawTweets() {
       setError(false);
       socket.emit("streaming", { clientId: uuid, keywords });
       socket.on("data", ({ data, sentiment }) => {
-        setResponse((prev) => {
-          return [...prev, [data.data]];
-        });
+        // setResponse((prev) => {
+        //   return [...prev, [data.data]];
+        // });
+        // console.log(sentiment);
         setSentimentData((prev) => [...prev, sentiment]);
         if (timeDomain.includes(sentiment.createdTime) === false) {
           setTimeDomain((prev) =>
@@ -84,7 +84,8 @@ export function RawTweets() {
 
   //clear raw tweets
   const handleClear = () => {
-    setResponse([]);
+    // setResponse([]);
+    setSentimentData([]);
     setTimeDomain([]);
   };
 
@@ -216,7 +217,7 @@ export function RawTweets() {
     updateChart();
 
     //update every time if catch new data
-  }, [response]);
+  }, [sentimentData, setSentimentData]);
 
   return (
     <Container>
@@ -260,12 +261,12 @@ export function RawTweets() {
       </Form.Group>
       <Row>
         <Col md={6}>
-          {response.map((data) => {
+          {sentimentData.map((data) => {
             return (
               <Row className="justify-content-md-center">
                 <Col md={{ offset: 3 }}>
-                  <h3>Tweet ID: {data[0].id}</h3>
-                  <Tweet className="tweet" tweetId={`${data[0].id}`} />
+                  <h3>Tweet ID: {data.tweetId}</h3>
+                  <Tweet className="tweet" tweetId={`${data.tweetId}`} />
                 </Col>
               </Row>
             );
