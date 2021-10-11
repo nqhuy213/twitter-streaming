@@ -84,7 +84,6 @@ class Controller {
       } else {
         //else get from mongo
         const data = await this.app.db.History.find({ clientId: uuid });
-        console.log(data);
         if (data.length > 0) {
           this.app.redisClient.setex(
             redisKey,
@@ -98,15 +97,20 @@ class Controller {
               })),
             })
           );
+          return res.status(200).json({
+            source: "MongoDB",
+            clientId: data[0].clientId,
+            rules: data.map((data) => ({
+              label: data.rules.map((data) => data.replace(" lang:en", " ")),
+              value: data.rules,
+            })),
+          });
+        } else {
+          res.status(200).json({
+            source: null,
+            rules: [],
+          });
         }
-        return res.status(200).json({
-          source: "MongoDB",
-          clientId: data[0].clientId,
-          rules: data.map((data) => ({
-            label: data.rules.map((data) => data.replace(" lang:en", " ")),
-            value: data.rules,
-          })),
-        });
       }
     });
   };

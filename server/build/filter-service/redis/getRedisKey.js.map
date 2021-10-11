@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/filter-service/redis/getRedisKey.js"],"names":["module","exports","userId"],"mappings":";;AAAAA,MAAM,CAACC,OAAP,GAAiB,UAACC,MAAD,EAAY;AAC3B,yBAAgBA,MAAhB;AACD,CAFD","sourcesContent":["module.exports = (userId) => {\r\n  return `redis-${userId}`;\r\n};\r\n"],"file":"getRedisKey.js"}

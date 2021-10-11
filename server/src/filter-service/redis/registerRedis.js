@@ -3,10 +3,9 @@ const redis = require("redis");
 //  create redis client and connect to redis server
 
 function registerRedis(app, cb) {
-  const redis_url = process.env.REDIS_URL || "redis://127.0.0.1";
-  const redis_client = redis.createClient(redis_url);
+  const redis_client = redis.createClient(process.env.REDIS_URL);
   app.redisClient = redis_client;
-  console.log("---- Redist connected ----");
+  console.log("---- Redis connected ----");
   if (cb) {
     cb();
   }

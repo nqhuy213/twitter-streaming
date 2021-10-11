@@ -11,7 +11,7 @@ function App() {
     <div className="App">
       {/* <UuidContext.Provider value={{ uuid: uuid, error: error }}> */}
       <Container className="header">
-        <img src="./Twitter-Logo.png" alt="twitter-logo" />
+        <img src="./twitter-logo.png" alt="twitter-logo" />
         <h1>Real Time Tweet Streamer</h1>
         <h4>by Trong Dat Nguyen & Quoc Huy Nguyen</h4>
 

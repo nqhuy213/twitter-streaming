@@ -9,6 +9,9 @@ if (process.env.NODE_ENV === "development") {
 
 function createApp() {
   const app = express();
+  app.get("/", (req, res) => {
+    res.send("Stream service is running.");
+  });
   return app;
 }
 

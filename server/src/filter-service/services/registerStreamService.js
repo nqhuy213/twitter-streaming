@@ -6,6 +6,9 @@ function registerStreamService(url, app) {
   socket.on("connect", () => {
     console.log("Stream socket connected");
   });
+  socket.on("connect_failed", function () {
+    console.log("Connection Failed");
+  });
   socket.on("data", async (data) => {
     /** Handle incoming tweet */
     const matchingRules = data.matching_rules.map((r) => r.id);
@@ -45,26 +48,6 @@ function registerStreamService(url, app) {
                 .to(stream.socketId)
                 .emit("data", { data: data, sentiment: sentiment });
             });
-            // const sentiment = {
-            //   tweetId: data.data.id,
-            //   sentimentData: sentimentData,
-            //   createdTime: new Date(data.data.created_at).getTime(),
-            // };
-            // /** Updating history data in database */
-            // app.db.History.updateOne(
-            //   {
-            //     clientId: stream.clientId,
-            //     rules: {
-            //       $all: stream.rules.map((rule) => rule.value),
-            //       $size: stream.rules.length,
-            //     },
-            //   },
-            //   { $push: { data: sentiment } }
-            // ).then(() => {
-            //   app.io
-            //     .to(stream.socketId)
-            //     .emit("data", { data: data, sentiment: sentiment });
-            // app.io.to(stream.socketId).emit("sentimentData", sentiment);
           });
           break;
         }
