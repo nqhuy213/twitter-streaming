@@ -10,7 +10,6 @@ import { InputNumber } from "rsuite";
 import * as d3 from "d3";
 
 //url
-const url = "http://localhost:3001";
 
 export function RawTweets() {
   //states
@@ -25,7 +24,7 @@ export function RawTweets() {
   const ref = useRef();
 
   //uuid
-  const { uuid, uuidError } = useContext(UuidContext);
+  const { uuid } = useContext(UuidContext);
 
   //handle change in search bar
   const handleChange = (newValue, actionMeta) => {
@@ -40,15 +39,11 @@ export function RawTweets() {
   //adding rules and emit to the socket
   const handleAdd = () => {
     try {
-      const socket = socketio(url);
+      const socket = socketio("");
       setLoading(true);
       setError(false);
       socket.emit("streaming", { clientId: uuid, keywords });
-      socket.on("data", ({ data, sentiment }) => {
-        // setResponse((prev) => {
-        //   return [...prev, [data.data]];
-        // });
-        // console.log(sentiment);
+      socket.on("data", ({ sentiment }) => {
         setSentimentData((prev) => [...prev, sentiment]);
         if (timeDomain.includes(sentiment.createdTime) === false) {
           setTimeDomain((prev) =>
@@ -56,20 +51,6 @@ export function RawTweets() {
           );
         }
       });
-      // socket.on("data", (data) => {
-      //   setResponse((prev) => {
-      //     return [...prev, [data.data]];
-      //   });
-      // });
-      // socket.on("sentimentData", (data) => {
-      //   // console.log(data);
-      //   setSentimentData((prev) => [...prev, data]);
-      //   if (timeDomain.includes(data.createdTime) === false) {
-      //     setTimeDomain((prev) =>
-      //       Array.from(new Set([...prev, data.createdTime]))
-      //     );
-      //   }
-      // });
       setTimeout(() => {
         //disconnect socket
         socket.disconnect();
@@ -82,15 +63,12 @@ export function RawTweets() {
     }
   };
 
-  //clear raw tweets
   const handleClear = () => {
-    // setResponse([]);
     setSentimentData([]);
     setTimeDomain([]);
   };
 
   /** sentiment chart */
-  //height and width of the svg
   const margin = { top: 10, right: 30, bottom: 30, left: 60 },
     width = 600 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
@@ -304,6 +282,4 @@ export function RawTweets() {
       </Row>
     </Container>
   );
-
-  // return <h1>Hello</h1>;
 }

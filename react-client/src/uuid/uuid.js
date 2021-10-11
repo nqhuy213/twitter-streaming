@@ -1,13 +1,10 @@
 import { useState, useEffect, createContext } from "react";
 import * as axios from "axios";
-// const { v4: uuidv4 } = require("uuid");
 
 const UuidContext = createContext();
-// export const uuidReact = uuidv4();
 
-//get the uuid from the server
 const UuidProvider = (props) => {
-  const url = "http://localhost:3001/getUuid";
+  const url = "/getUuid";
   const [uuid, setUuid] = useState("");
   const [error, setError] = useState({ status: false, message: "" });
 

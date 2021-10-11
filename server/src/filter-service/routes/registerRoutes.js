@@ -1,4 +1,5 @@
 const Controller = require("../controller");
+const path = require("path");
 
 function registerRoutes(app) {
   const ctrl = new Controller(app);
@@ -15,6 +16,14 @@ function registerRoutes(app) {
 
   /** Get history data */
   app.get("/getTweets", ctrl.getTweets);
+
+  /** Any routes that don't match on our static assets or api should be sent to the React Application
+   * This allows for the use of things like React Router */
+  app.use((req, res) => {
+    res.sendFile(
+      path.join(__dirname, "../../../../react-client/build", "index.html")
+    );
+  });
 }
 
 module.exports = registerRoutes;
