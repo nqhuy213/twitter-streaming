@@ -7,10 +7,14 @@ const twitterStreamUrl =
   "https://api.twitter.com/2/tweets/search/stream?&&tweet.fields=created_at";
 
 function registerStream(app) {
+  console.log(process.env.TWITTER_TOKEN);
   const stream = needle.get(twitterStreamUrl, {
-    headers: { Authorization: `Bearer ${process.env.TWITTER_TOKEN}` },
-    timeout: 20000,
+    headers: {
+      Authorization:
+        "Bearer AAAAAAAAAAAAAAAAAAAAAAEUTAEAAAAA25iMRaSMSxgh4UiSo2BU%2Byw5d1g%3DZUGuRgRZFefXjVEQ021g5k0mNlQJ1QeRCfn7FWQDOBjREp1VaC",
+    },
   });
+  console.log(stream);
   app.stream = stream;
   console.log("---- Stream Registered ----");
   stream
@@ -22,11 +26,10 @@ function registerStream(app) {
         app.io.emit("data", tweet);
       } catch (error) {}
     })
-    .on("end", () => {
+    .on("end", (e) => {
       console.log("end");
     })
     .on("error", (error) => {
-      console.log(error);
       if (error.code === "ETIMEDOUT") {
         stream.emit("timeout");
       }
