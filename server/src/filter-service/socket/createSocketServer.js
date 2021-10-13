@@ -63,17 +63,42 @@ function createSocketServer(server, app) {
         socketId: socket.id,
       }).then((deletedStream) => {
         if (deletedStream !== null) {
-          deleteRules(deletedStream.rules)
-            .then((res) => {
+          app.db.Stream.find({}).then((remainingStreams) => {
+            const remainingRules = [];
+            const toDeleteRules = [];
+            remainingStreams.forEach((stream) => {
+              stream.rules.forEach((rule) => {
+                if (!remainingRules.includes(rule.value)) {
+                  remainingRules.push(rule.value);
+                }
+              });
+            });
+            deletedStream.rules.forEach((rule) => {
+              if (!remainingRules.includes(rule.value)) {
+                toDeleteRules.push(rule);
+              }
+            });
+            if (toDeleteRules.length > 0) {
+              deleteRules(toDeleteRules)
+                .then((res) => {
+                  console.log(`To delete ${deletedStream.socketId}`);
+
+                  /** Delete rules in Twitter */
+
+                  console.log(`Socket ${socket.id} disconnected`);
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
+            } else {
               console.log(`To delete ${deletedStream.socketId}`);
 
               /** Delete rules in Twitter */
 
               console.log(`Socket ${socket.id} disconnected`);
-            })
-            .catch((err) => {
-              throw err;
-            });
+            }
+          });
         }
       });
     });
