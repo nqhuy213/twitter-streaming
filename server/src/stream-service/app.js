@@ -3,8 +3,9 @@ const registerStream = require("./registerStream");
 const registerSocket = require("./registerSocket");
 const { deleteAllRules } = require("../libs/api");
 
+const path = require("path");
 if (process.env.NODE_ENV === "development") {
-  require("dotenv").config();
+  require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 }
 
 function createApp() {

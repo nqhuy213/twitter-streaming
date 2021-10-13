@@ -7,14 +7,12 @@ const twitterStreamUrl =
   "https://api.twitter.com/2/tweets/search/stream?&&tweet.fields=created_at";
 
 function registerStream(app) {
-  console.log(process.env.TWITTER_TOKEN);
+  console.log(process.env.TWITTER_BEARER_TOKEN);
   const stream = needle.get(twitterStreamUrl, {
     headers: {
-      Authorization:
-        "Bearer AAAAAAAAAAAAAAAAAAAAAAEUTAEAAAAA25iMRaSMSxgh4UiSo2BU%2Byw5d1g%3DZUGuRgRZFefXjVEQ021g5k0mNlQJ1QeRCfn7FWQDOBjREp1VaC",
+      Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
     },
   });
-  console.log(stream);
   app.stream = stream;
   console.log("---- Stream Registered ----");
   stream

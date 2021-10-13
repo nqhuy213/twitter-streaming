@@ -8,9 +8,9 @@ const {
 const registerStreamService = require("./services/registerStreamService");
 const registerDatabase = require("../libs/database/registerDatabase");
 const registerRedis = require("./redis/registerRedis");
-
+const path = require("path");
 if (process.env.NODE_ENV === "development") {
-  require("dotenv").config();
+  require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 }
 
 function createApp() {

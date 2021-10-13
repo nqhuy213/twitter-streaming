@@ -32,7 +32,7 @@ const getMyOwnRules = async (keywords) => {
 
 const getStream = () => {
   const stream = needle.get(twitterStreamUrl, {
-    headers: { Authorization: `Bearer ${process.env.TWITTER_TOKEN}` },
+    headers: { Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },
   });
 
   return stream;
@@ -105,7 +105,7 @@ const twitterApiCall = async (method = "GET", url, params, body) => {
     params: params,
     data: body,
     headers: {
-      Authorization: `Bearer ${process.env.TWITTER_TOKEN}`,
+      Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
       "Content-Type": "application/json",
     },
   };
