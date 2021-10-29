@@ -77,7 +77,8 @@ class Controller {
       const remainingStreams = await this.app.db.Stream.find({
         clientId: { $ne: clientId },
       });
-      console.log(rules);
+      // console.log("deleted");
+      // console.log(rules);
       let remainingRules = [];
       remainingStreams.map((stream) =>
         stream.rules.map((rule) => remainingRules.push(rule.value))

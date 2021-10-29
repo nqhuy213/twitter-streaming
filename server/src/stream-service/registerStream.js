@@ -22,6 +22,7 @@ function registerStream(app) {
       try {
         console.log(`Socket index to send: ${app.nextSocket}`);
         const tweet = JSON.parse(data);
+        console.log(tweet);
         app.io.to(app.connections[app.nextSocket].id).emit("data", tweet);
         app.nextSocket =
           app.nextSocket + 1 === app.connections.length

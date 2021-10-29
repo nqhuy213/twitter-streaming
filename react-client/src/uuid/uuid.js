@@ -4,7 +4,7 @@ import * as axios from "axios";
 const UuidContext = createContext();
 
 const UuidProvider = (props) => {
-  const url = "/getUuid";
+  const url = "http://localhost:3001/getUuid";
   const [uuid, setUuid] = useState("");
   const [error, setError] = useState({ status: false, message: "" });
 

@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
 import { Tweet } from "react-twitter-widgets";
 import "./rawTweets.css";
-import socketio from "socket.io-client";
+import * as axios from "axios";
 import { UuidContext } from "../../uuid/uuid";
 import { InputNumber } from "rsuite";
 
@@ -12,13 +12,18 @@ import * as d3 from "d3";
 //url
 
 export function RawTweets() {
+  const searchURL = `/api/search`;
+  const streamRulesURL = `/api/stream-rules`;
+  const deleteRulesURL = `/api/delete-rules`;
+
   //states
   const [keywords, setKeywords] = useState([]);
   const [sentimentData, setSentimentData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [timeDomain, setTimeDomain] = useState([]);
   const [seconds, setSeconds] = useState(5);
-  const [error, setError] = useState({ status: false, message: "" });
+  // const [error, setError] = useState({ status: false, message: "" });
+  const [flag, setFlag] = useState(false);
 
   //ref for svg
   const ref = useRef();
@@ -38,30 +43,52 @@ export function RawTweets() {
 
   //adding rules and emit to the socket
   const handleAdd = () => {
-    try {
-      const socket = socketio("");
-      setLoading(true);
-      setError(false);
-      socket.emit("streaming", { clientId: uuid, keywords });
-      socket.on("data", ({ sentiment }) => {
-        setSentimentData((prev) => [...prev, sentiment]);
-        if (timeDomain.includes(sentiment.createdTime) === false) {
-          setTimeDomain((prev) =>
-            Array.from(new Set([...prev, sentiment.createdTime]))
-          );
-        }
+    //url
+    axios.post(streamRulesURL, {
+      clientId: uuid,
+      rules: keywords,
+    });
+    let rules = keywords.map((keyword) => {
+      return { value: `${keyword} lang:en` };
+    });
+    setFlag(true);
+
+    console.log(rules);
+
+    setTimeout(() => {
+      axios.delete(deleteRulesURL, {
+        data: {
+          clientId: uuid,
+          rules: rules,
+        },
       });
-      setTimeout(() => {
-        //disconnect socket
-        socket.disconnect();
-        socket.close();
-        setLoading(false);
-        return;
-      }, seconds * 1000);
-    } catch (err) {
-      setError(err);
-    }
+      setFlag(false);
+    }, seconds * 1000);
   };
+
+  useEffect(() => {
+    if (flag === true) {
+      const interval = setInterval(async () => {
+        await axios
+          .post(searchURL, {
+            clientId: uuid,
+            rules: keywords,
+          })
+          .then(async (res) => {
+            if (res !== null) {
+              let temp = (res?.data?.payload?.result?.data).map(
+                (sentimentData) => {
+                  return sentimentData.createdTime;
+                }
+              );
+              setSentimentData(res?.data?.payload?.result?.data);
+              setTimeDomain(temp);
+            }
+          });
+      }, 1 * 1000); //10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [flag]);
 
   const handleClear = () => {
     setSentimentData([]);
@@ -195,20 +222,21 @@ export function RawTweets() {
     updateChart();
 
     //update every time if catch new data
-  }, [sentimentData, setSentimentData]);
+  }, [timeDomain]);
 
   return (
     <Container>
       <Form.Group className="mb-3">
         <Row>
           <Form.Label>Adding Rules</Form.Label>
-          <Col className="col-search-rule" md={9}>
+          <Col className="col-search-rule" md={8}>
             <CreatableSelect isMulti onChange={handleChange} />
           </Col>
-          <Col md={1} className="col-btn-add">
-            <div style={{ width: 100 }}>
+          <Col md={2} className="col-btn-add">
+            <div style={{ width: "100%" }}>
               <InputNumber
                 defaultValue={5}
+                postfix="seconds"
                 min={0}
                 max={60}
                 onChange={handleSecond}
@@ -240,10 +268,19 @@ export function RawTweets() {
       <Row>
         <Col md={6}>
           {sentimentData.map((data) => {
+            let status;
+            if (data.sentimentData < 0) {
+              status = "Negative";
+            } else {
+              status = "Positive";
+            }
             return (
               <Row className="justify-content-md-center">
                 <Col md={{ offset: 3 }}>
-                  <h3>Tweet ID: {data.tweetId}</h3>
+                  <p>
+                    Tweet ID: {data.tweetId} is {status}
+                  </p>
+
                   <Tweet className="tweet" tweetId={`${data.tweetId}`} />
                 </Col>
               </Row>
@@ -272,12 +309,10 @@ export function RawTweets() {
           )}
         </Col>
         <Col md={6}>
-          <svg
-            className="sentiment-chart"
-            ref={ref}
-            width={"100%"}
-            height={`400px`}
-          />
+          <div className="sentiment-chart" style={{ textAlign: "center" }}>
+            <svg ref={ref} width={"100%"} height={`400px`} />
+            <h2>Sentiment Scatter Plot Chart</h2>
+          </div>
         </Col>
       </Row>
     </Container>

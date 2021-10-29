@@ -5,12 +5,13 @@ import { Container } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import { Row, Col } from "react-bootstrap";
 import { UuidContext } from "../../uuid/uuid";
+import { Tweet } from "react-twitter-widgets";
 
 const defaultDatasets = {
-  labels: ["Good", "Bad"],
+  labels: ["Positive", "Negative"],
   datasets: [
     {
-      label: "Sentiment Bar Chart",
+      label: "Number of Tweets",
       data: [0, 0],
       backgroundColor: ["rgba(75, 192, 192, 0.2)", "rgba(255, 99, 132, 0.2)"],
       borderColor: ["rgba(75, 192, 192)", "rgba(255, 99, 132)"],
@@ -18,8 +19,19 @@ const defaultDatasets = {
     },
   ],
 };
+
+const options = {
+  plugins: {
+    title: {
+      display: true,
+      text: "Sentiment Bar Chart",
+    },
+  },
+};
+
 export default function History() {
   const [currentRules, setCurrentRules] = useState([]);
+  const [sentimentData, setSentimentData] = useState([1]);
   const [datasets, setDatasets] = useState(defaultDatasets);
   const { uuid } = useContext(UuidContext);
 
@@ -32,6 +44,8 @@ export default function History() {
       let good = 0;
       let bad = 0;
       await axios.get(url).then((res) => {
+        console.log(res.data.data[0].data);
+        setSentimentData(res.data.data[0].data);
         res.data.data[0].data.forEach((e) => {
           if (e.sentimentData >= 0) {
             good += 1;
@@ -40,7 +54,7 @@ export default function History() {
           }
         });
         setDatasets({
-          labels: ["Good", "Bad"],
+          labels: ["Positive", "Negative"],
           datasets: [
             {
               label: "Sentiment Bar Chart",
@@ -69,7 +83,7 @@ export default function History() {
   return (
     <Container>
       <Row>
-        <Col md={12}>
+        <Col>
           <SelectPicker
             data={rules.rules}
             block
@@ -78,7 +92,34 @@ export default function History() {
           />
         </Col>
       </Row>
-      <Bar data={datasets} />
+      <Row>
+        <Col md={6}>
+          {sentimentData.map((data) => {
+            let status;
+            if (data.sentimentData < 0) {
+              status = "Negative";
+            } else {
+              status = "Positive";
+            }
+            return (
+              <Row className="justify-content-md-center">
+                <Col md={{ offset: 3 }}>
+                  <p>
+                    Tweet ID: {data.tweetId} is {status}
+                  </p>
+
+                  <Tweet className="tweet" tweetId={`${data.tweetId}`} />
+                </Col>
+              </Row>
+            );
+          })}
+        </Col>
+        <Col md={6}>
+          <div className="sentiment-chart">
+            <Bar data={datasets} options={options} />
+          </div>
+        </Col>
+      </Row>
     </Container>
   );
 }
