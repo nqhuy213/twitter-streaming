@@ -35,22 +35,19 @@ export default function History() {
   const [sentimentData, setSentimentData] = useState([]);
   const [datasets, setDatasets] = useState(defaultDatasets);
   const { uuid } = useContext(UuidContext);
-  const [flag, setFlag] = useState(true);
 
   const [rules, setRules] = useState([]);
   const handleChange = async (value, event) => {
-    setFlag((prev) => !prev);
     if (value !== null) {
       setCurrentRules(value);
       /** Get history data */
       // if (currentRules) {
-      const url = `http://localhost:3001/api/getTweets?uuid=${uuid}&rules=${value}`;
+      const url = `/api/getTweets?uuid=${uuid}&rules=${value}`;
       let good = 0;
       let bad = 0;
       await axios
         .get(url)
         .then((res) => {
-          console.log(res.data.data[0].data);
           setSentimentData(res.data.data[0].data);
           res.data.data[0].data.forEach((e) => {
             if (e.sentimentData >= 0) {
@@ -76,64 +73,20 @@ export default function History() {
           });
         })
         .catch((err) => {
-          console.log(err);
-          setError({ status: true, message: err });
+          setError({
+            status: true,
+            message: "There is something when fetching data!",
+          });
         });
       // }
     }
   };
-  useEffect(() => {
-    return function cleanup() {
-      setSentimentData([]);
-      setDatasets(defaultDatasets);
-    };
-  }, []);
-  // useEffect(() => {
-  //   // if (currentRules) {
-  //   const url = `http://localhost:3001/api/getTweets?uuid=${uuid}&rules=${value}`;
-  //   let good = 0;
-  //   let bad = 0;
-  //   await axios
-  //     .get(url)
-  //     .then((res) => {
-  //       console.log(res.data.data[0].data);
-  //       setSentimentData(res.data.data[0].data);
-  //       res.data.data[0].data.forEach((e) => {
-  //         if (e.sentimentData >= 0) {
-  //           good += 1;
-  //         } else {
-  //           bad += 1;
-  //         }
-  //       });
-  //       setDatasets({
-  //         labels: ["Positive", "Negative"],
-  //         datasets: [
-  //           {
-  //             label: "Sentiment Bar Chart",
-  //             data: [good, bad],
-  //             backgroundColor: [
-  //               "rgba(75, 192, 192, 0.2)",
-  //               "rgba(255, 99, 132, 0.2)",
-  //             ],
-  //             borderColor: ["rgba(75, 192, 192)", "rgba(255, 99, 132)"],
-  //             borderWidth: 1,
-  //           },
-  //         ],
-  //       });
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //       setError({ status: true, message: err });
-  //     });
-  //   // }
-  // }, [currentRules]);
 
   const handleOnClick = async () => {
-    const url = `http://localhost:3001/api/getAllRules?uuid=${uuid}`;
+    const url = `/api/getAllRules?uuid=${uuid}`;
     axios
       .get(url)
       .then((res) => {
-        // console.log(res);
         setRules(res.data);
       })
       .catch((err) => {

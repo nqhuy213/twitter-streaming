@@ -85,6 +85,7 @@ class Controller {
   deleteStreamRules = async (req, res, next) => {
     try {
       const { clientId, rules } = req.body;
+      console.log(rules);
       await this.app.db.Stream.deleteOne({ clientId: clientId });
       const remainingStreams = await this.app.db.Stream.find({
         clientId: { $ne: clientId },

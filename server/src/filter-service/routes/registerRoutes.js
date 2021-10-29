@@ -9,7 +9,7 @@ function registerRoutes(app) {
   /** Add rules to Twitter. Example request body: {clientId: 1, rules: ["dog", "cat"]} */
   app.post("/api/stream-rules", ctrl.addStreamRules);
   /** Delete rules in Twitter. Example request body: {clientId: 1, rules: [{value: "dog lang:en"}, {value: "cat lang:en"}]} */
-  app.delete("/api/stream-rules", ctrl.deleteStreamRules);
+  app.post("/api/delete-rules", ctrl.deleteStreamRules);
   /** See all rules in Twitter */
   app.get("/api/stream-rules", ctrl.getStreamRules);
 

@@ -12,9 +12,9 @@ import * as d3 from "d3";
 //url
 
 export function RawTweets() {
-  const searchURL = `http://localhost:3001/api/search`;
-  const streamRulesURL = `http://localhost:3001/api/stream-rules`;
-  const deleteRulesURL = `http://localhost:3001/api/delete-rules`;
+  const searchURL = `/api/search`;
+  const streamRulesURL = `/api/stream-rules`;
+  const deleteRulesURL = `/api/delete-rules`;
 
   //states
   const [err, setErr] = useState({ status: false, message: "" });
@@ -23,7 +23,6 @@ export function RawTweets() {
   const [loading, setLoading] = useState(false);
   const [timeDomain, setTimeDomain] = useState([]);
   const [seconds, setSeconds] = useState(5);
-  // const [error, setError] = useState({ status: false, message: "" });
   const [flag, setFlag] = useState(false);
 
   //ref for svg
@@ -51,26 +50,20 @@ export function RawTweets() {
         rules: keywords,
       })
       .catch((err) => {
-        console.log(err);
-        // setErr({ status: true });
+        setErr({ status: true });
       });
     let rules = keywords.map((keyword) => {
       return { value: `${keyword} lang:en` };
     });
     setFlag(true);
 
-    console.log(rules);
-
     setTimeout(() => {
       axios
-        .delete(deleteRulesURL, {
-          data: {
-            clientId: uuid,
-            rules: rules,
-          },
+        .post(deleteRulesURL, {
+          clientId: uuid,
+          rules: rules,
         })
         .catch((err) => {
-          console.log(err);
           setErr({ status: true });
         });
       setFlag(false);
@@ -86,7 +79,6 @@ export function RawTweets() {
             rules: keywords,
           })
           .then((res) => {
-            // console.log(res.data);
             if (res.data.payload.result.data !== null) {
               let temp = res.data.payload.result.data.map((sentimentData) => {
                 return sentimentData.createdTime;
@@ -97,7 +89,6 @@ export function RawTweets() {
             }
           })
           .catch((err) => {
-            console.log(err);
             setErr({ status: true, message: "problem when fectching data!" });
           });
       }, 1 * 1000); //10 seconds
@@ -186,7 +177,6 @@ export function RawTweets() {
             return x(d.createdTime);
           })
           .attr("cy", (d) => {
-            // console.log(d);
             return y(d.sentimentData);
           })
           .attr("r", 5)
