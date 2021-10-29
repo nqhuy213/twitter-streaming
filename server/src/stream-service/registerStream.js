@@ -15,16 +15,18 @@ function registerStream(app) {
   });
   app.stream = stream;
   console.log("---- Stream Registered ----");
-  let nextSocket = 0;
+
   stream
     .on("data", (data) => {
       /** Emit the raw Tweets data to all socket clients */
       try {
-        console.log(`Socket index to send: ${nextSocket}`);
+        console.log(`Socket index to send: ${app.nextSocket}`);
         const tweet = JSON.parse(data);
-        app.io.to(app.connections[nextSocket].id).emit("data", tweet);
-        nextSocket =
-          nextSocket + 1 === app.connections.length ? 0 : nextSocket + 1;
+        app.io.to(app.connections[app.nextSocket].id).emit("data", tweet);
+        app.nextSocket =
+          app.nextSocket + 1 === app.connections.length
+            ? 0
+            : app.nextSocket + 1;
       } catch (error) {}
     })
     .on("end", (e) => {

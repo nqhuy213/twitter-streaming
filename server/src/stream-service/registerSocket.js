@@ -2,6 +2,7 @@ function registerSocket(server, app) {
   const io = require("socket.io")(server);
   app.io = io;
   app.connections = [];
+  app.nextSocket = 0;
   io.on("connection", (socket) => {
     app.connections.push(socket);
     console.log("Filter service connected");
@@ -9,9 +10,8 @@ function registerSocket(server, app) {
       console.log("Filter service disconnected");
       deleted = app.connections.filter((s) => s.id !== socket.id);
       app.connections = deleted;
-      console.log(app.connections);
+      app.nextSocket = 0;
     });
-    console.log(app.connections);
   });
 }
 

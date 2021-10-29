@@ -15,14 +15,13 @@ class Controller {
 
   searchTweets = async (req, res, next) => {
     try {
-      const { keywords, socket } = req.body;
-      // console.log(keywords);
-      const ownRules = await getMyOwnRules(keywords);
-
-      /** Store the socket with the specific rules */
-      const newStream = new this.app.db.Stream({ socket, rules: ownRules });
-      await newStream.save();
-      successResponse(res, { ownRules });
+      const { clientId, rules } = req.body;
+      const fixedRules = rules.map((rule) => rule + " lang:en");
+      const result = await this.app.db.History.findOne({
+        clientId: clientId,
+        rules: fixedRules,
+      });
+      successResponse(res, { result });
     } catch (error) {
       errorResponse(res, 500, error.message);
     }
@@ -39,9 +38,32 @@ class Controller {
 
   addStreamRules = async (req, res, next) => {
     try {
-      const { rules } = req.body;
-      const response = await getMyOwnRules(rules);
-      successResponse(res, { add: response });
+      const { clientId, rules } = req.body;
+      const ownRules = await getMyOwnRules(rules);
+      /** Add into the stream and history in database */
+      const history = await this.app.db.History.findOne({
+        clientId: clientId,
+        rules: rules.map((keyword) => keyword + " lang:en"),
+      });
+      /** Already exists in the database*/
+      if (!history) {
+        /** Not exists, create new one */
+        const newHistory = new this.app.db.History({
+          clientId: clientId,
+          rules: rules.map((keyword) => keyword + " lang:en"),
+        });
+        await newHistory.save();
+      }
+
+      /** Add into the stream collection */
+      const Stream = this.app.db.Stream;
+      const newStream = new Stream({
+        rules: ownRules,
+        clientId: clientId,
+      });
+      await newStream.save();
+
+      successResponse(res, { add: ownRules });
     } catch (error) {
       errorResponse(res, 500, error.message);
     }
@@ -50,8 +72,10 @@ class Controller {
   //delete rules
   deleteStreamRules = async (req, res, next) => {
     try {
-      const { rules } = req.body;
+      const { clientId, rules } = req.body;
       const response = await deleteRules(rules);
+      /** Delete client in the stream collection */
+      await this.app.db.Stream.deleteOne({ clientId: clientId });
       successResponse(res, { deleted: response });
     } catch (error) {
       errorResponse(res, 500, error.message);

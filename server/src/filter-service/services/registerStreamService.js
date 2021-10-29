@@ -13,9 +13,7 @@ function registerStreamService(url, app) {
     /** Handle incoming tweet */
     const matchingRules = data.matching_rules.map((r) => r.id);
     /** Query database stream that has matching rules */
-    const allStream = await app.db.Stream.find({
-      socketId: { $in: [...app.clientConnectionIds] },
-    });
+    const allStream = await app.db.Stream.find({});
 
     for (const stream of allStream) {
       for (const streamRule of stream.rules) {
@@ -34,7 +32,7 @@ function registerStreamService(url, app) {
             };
 
             /** Updating history data in database */
-            app.db.History.updateOne(
+            await app.db.History.updateOne(
               {
                 clientId: stream.clientId,
                 rules: {
@@ -42,12 +40,8 @@ function registerStreamService(url, app) {
                   $size: stream.rules.length,
                 },
               },
-              { $push: { data: sentiment } }
-            ).then(() => {
-              app.io
-                .to(stream.socketId)
-                .emit("data", { data: data, sentiment: sentiment });
-            });
+              { $push: { data: { ...sentiment } } }
+            );
           });
           break;
         }
