@@ -40,6 +40,18 @@ class Controller {
     try {
       const { clientId, rules } = req.body;
       const ownRules = await getMyOwnRules(rules);
+      /** Delete existing Redis key */
+      const redisKey = getRedisKey(
+        clientId + "-" + rules.map((rule) => rule + " lang:en").join(",")
+      );
+      console.log(redisKey);
+      this.app.redisClient.get(redisKey, async (err, result) => {
+        //if there is result
+        if (result) {
+          console.log(`Redis key ${redisKey} deleted`);
+          this.app.redisClient.del(redisKey);
+        }
+      });
       /** Add into the stream and history in database */
       const history = await this.app.db.History.findOne({
         clientId: clientId,
@@ -163,7 +175,6 @@ class Controller {
     //redis key
     const redisKey = getRedisKey(`${uuid}-${rules}`);
 
-    console.log(rules.split(","));
     //try get data from redis
     return this.app.redisClient.get(redisKey, async (err, result) => {
       //if there is result
