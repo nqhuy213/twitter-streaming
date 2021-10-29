@@ -12,9 +12,9 @@ import * as d3 from "d3";
 //url
 
 export function RawTweets() {
-  const searchURL = `/api/search`;
-  const streamRulesURL = `/api/stream-rules`;
-  const deleteRulesURL = `/api/delete-rules`;
+  const searchURL = `http://localhost:3001/api/search`;
+  const streamRulesURL = `http://localhost:3001/api/stream-rules`;
+  const deleteRulesURL = `http://localhost:3001/api/delete-rules`;
 
   //states
   const [keywords, setKeywords] = useState([]);
@@ -68,22 +68,24 @@ export function RawTweets() {
 
   useEffect(() => {
     if (flag === true) {
-      const interval = setInterval(async () => {
-        await axios
+      const interval = setInterval(() => {
+        axios
           .post(searchURL, {
             clientId: uuid,
             rules: keywords,
           })
-          .then(async (res) => {
-            if (res !== null) {
-              let temp = (res?.data?.payload?.result?.data).map(
-                (sentimentData) => {
-                  return sentimentData.createdTime;
-                }
-              );
-              setSentimentData(res?.data?.payload?.result?.data);
+          .then((res) => {
+            // console.log(res.data);
+            if (res.data.payload.result.data !== null) {
+              let temp = res.data.payload.result.data.map((sentimentData) => {
+                return sentimentData.createdTime;
+              });
+              setSentimentData(res.data.payload.result.data);
               setTimeDomain(temp);
             }
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }, 1 * 1000); //10 seconds
       return () => clearInterval(interval);

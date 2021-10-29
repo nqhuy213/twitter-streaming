@@ -14,11 +14,11 @@ function registerRoutes(app) {
   app.get("/api/stream-rules", ctrl.getStreamRules);
 
   /** User id */
-  app.get("/getUuid", ctrl.getUserId);
+  app.get("/api/getUuid", ctrl.getUserId);
   /** Get history rules data */
-  app.get("/getAllRules", ctrl.getAllRules);
+  app.get("/api/getAllRules", ctrl.getAllRules);
   /** Get history data */
-  app.get("/getTweets", ctrl.getTweets);
+  app.get("/api/getTweets", ctrl.getTweets);
 
   //post data
 

@@ -4,14 +4,14 @@ import * as axios from "axios";
 const UuidContext = createContext();
 
 const UuidProvider = (props) => {
-  const url = "http://localhost:3001/getUuid";
+  const url = "http://localhost:3001/api/getUuid";
   const [uuid, setUuid] = useState("");
   const [error, setError] = useState({ status: false, message: "" });
 
   const getRepo = async () => {
     await axios
       .get(url)
-      .then((res) => setUuid(res.data))
+      .then((res) => setUuid(res.data.payload.uuid))
       .catch((err) => setError({ status: true, message: err.data }));
   };
   useEffect(() => {

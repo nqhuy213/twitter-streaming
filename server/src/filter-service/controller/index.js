@@ -100,12 +100,14 @@ class Controller {
   getUserId = (req, res, next) => {
     try {
       //create uuid and send back to client
-      return res.status(200).send(uuidv4());
+      // return res.status(200).send(uuidv4());
+      successResponse(res, { uuid: uuidv4() });
     } catch (err) {
       //if error
-      return res
-        .status(400)
-        .send({ message: "Failed to create UUID", error: true });
+      // return res
+      //   .status(400)
+      //   .send({ message: "Failed to create UUID", error: true });
+      errorResponse(res, 400, err.message);
     }
   };
 
