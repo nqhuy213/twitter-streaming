@@ -17,6 +17,7 @@ export function RawTweets() {
   const deleteRulesURL = `http://localhost:3001/api/delete-rules`;
 
   //states
+  const [err, setErr] = useState({ status: false, message: "" });
   const [keywords, setKeywords] = useState([]);
   const [sentimentData, setSentimentData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,10 +45,15 @@ export function RawTweets() {
   //adding rules and emit to the socket
   const handleAdd = () => {
     //url
-    axios.post(streamRulesURL, {
-      clientId: uuid,
-      rules: keywords,
-    });
+    axios
+      .post(streamRulesURL, {
+        clientId: uuid,
+        rules: keywords,
+      })
+      .catch((err) => {
+        console.log(err);
+        // setErr({ status: true });
+      });
     let rules = keywords.map((keyword) => {
       return { value: `${keyword} lang:en` };
     });
@@ -56,12 +62,17 @@ export function RawTweets() {
     console.log(rules);
 
     setTimeout(() => {
-      axios.delete(deleteRulesURL, {
-        data: {
-          clientId: uuid,
-          rules: rules,
-        },
-      });
+      axios
+        .delete(deleteRulesURL, {
+          data: {
+            clientId: uuid,
+            rules: rules,
+          },
+        })
+        .catch((err) => {
+          console.log(err);
+          setErr({ status: true });
+        });
       setFlag(false);
     }, seconds * 1000);
   };
@@ -82,10 +93,12 @@ export function RawTweets() {
               });
               setSentimentData(res.data.payload.result.data);
               setTimeDomain(temp);
+              setErr({ status: false, message: "" });
             }
           })
           .catch((err) => {
             console.log(err);
+            setErr({ status: true, message: "problem when fectching data!" });
           });
       }, 1 * 1000); //10 seconds
       return () => clearInterval(interval);
@@ -226,97 +239,106 @@ export function RawTweets() {
     //update every time if catch new data
   }, [timeDomain]);
 
-  return (
-    <Container>
-      <Form.Group className="mb-3">
+  if (err.status === true) {
+    return (
+      <h1>
+        Uh Oh! There is something wrong!
+        <h1>{err.message}</h1>
+      </h1>
+    );
+  } else {
+    return (
+      <Container>
+        <Form.Group className="mb-3">
+          <Row>
+            <Form.Label>Adding Rules</Form.Label>
+            <Col className="col-search-rule" md={8}>
+              <CreatableSelect isMulti onChange={handleChange} />
+            </Col>
+            <Col md={2} className="col-btn-add">
+              <div style={{ width: "100%" }}>
+                <InputNumber
+                  defaultValue={5}
+                  postfix="seconds"
+                  min={0}
+                  max={60}
+                  onChange={handleSecond}
+                />
+              </div>
+            </Col>
+            <Col md={1} className="col-btn-add">
+              <Button
+                className="btn-add btn-sm"
+                variant="primary"
+                type="submit"
+                onClick={handleAdd}
+              >
+                Start
+              </Button>
+            </Col>
+            <Col md={1} className="col-btn-add">
+              <Button
+                className="btn-add btn-sm"
+                variant="primary"
+                type="submit"
+                onClick={handleClear}
+              >
+                Clear Tweets
+              </Button>
+            </Col>
+          </Row>
+        </Form.Group>
         <Row>
-          <Form.Label>Adding Rules</Form.Label>
-          <Col className="col-search-rule" md={8}>
-            <CreatableSelect isMulti onChange={handleChange} />
+          <Col md={6}>
+            {sentimentData.map((data) => {
+              let status;
+              if (data.sentimentData < 0) {
+                status = "Negative";
+              } else {
+                status = "Positive";
+              }
+              return (
+                <Row className="justify-content-md-center">
+                  <Col md={{ offset: 3 }}>
+                    <p>
+                      Tweet ID: {data.tweetId} is {status}
+                    </p>
+
+                    <Tweet className="tweet" tweetId={`${data.tweetId}`} />
+                  </Col>
+                </Row>
+              );
+            })}
+            {!loading ? (
+              <Button
+                className="btn-add"
+                variant="primary"
+                type="submit"
+                onClick={handleAdd}
+              >
+                Load More
+              </Button>
+            ) : (
+              <div className="lds-roller">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            )}
           </Col>
-          <Col md={2} className="col-btn-add">
-            <div style={{ width: "100%" }}>
-              <InputNumber
-                defaultValue={5}
-                postfix="seconds"
-                min={0}
-                max={60}
-                onChange={handleSecond}
-              />
+          <Col md={6}>
+            <div className="sentiment-chart" style={{ textAlign: "center" }}>
+              <svg ref={ref} width={"100%"} height={`400px`} />
+              <h2>Sentiment Scatter Plot Chart</h2>
             </div>
-          </Col>
-          <Col md={1} className="col-btn-add">
-            <Button
-              className="btn-add btn-sm"
-              variant="primary"
-              type="submit"
-              onClick={handleAdd}
-            >
-              Start
-            </Button>
-          </Col>
-          <Col md={1} className="col-btn-add">
-            <Button
-              className="btn-add btn-sm"
-              variant="primary"
-              type="submit"
-              onClick={handleClear}
-            >
-              Clear Tweets
-            </Button>
           </Col>
         </Row>
-      </Form.Group>
-      <Row>
-        <Col md={6}>
-          {sentimentData.map((data) => {
-            let status;
-            if (data.sentimentData < 0) {
-              status = "Negative";
-            } else {
-              status = "Positive";
-            }
-            return (
-              <Row className="justify-content-md-center">
-                <Col md={{ offset: 3 }}>
-                  <p>
-                    Tweet ID: {data.tweetId} is {status}
-                  </p>
-
-                  <Tweet className="tweet" tweetId={`${data.tweetId}`} />
-                </Col>
-              </Row>
-            );
-          })}
-          {!loading ? (
-            <Button
-              className="btn-add"
-              variant="primary"
-              type="submit"
-              onClick={handleAdd}
-            >
-              Load More
-            </Button>
-          ) : (
-            <div className="lds-roller">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          )}
-        </Col>
-        <Col md={6}>
-          <div className="sentiment-chart" style={{ textAlign: "center" }}>
-            <svg ref={ref} width={"100%"} height={`400px`} />
-            <h2>Sentiment Scatter Plot Chart</h2>
-          </div>
-        </Col>
-      </Row>
-    </Container>
-  );
+      </Container>
+    );
+  }
 }

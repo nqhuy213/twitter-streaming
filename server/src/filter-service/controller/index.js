@@ -113,47 +113,47 @@ class Controller {
 
   getAllRules = async (req, res, next) => {
     const uuid = req.query.uuid;
-    //redis key
-    const redisKey = getRedisKey(uuid);
+    // //redis key
+    // const redisKey = getRedisKey(uuid);
 
-    //try get data from redis
-    return this.app.redisClient.get(redisKey, async (err, result) => {
-      //if there is result
-      if (result) {
-        const resultJSON = JSON.parse(result);
-        return res.status(200).json(resultJSON);
-      } else {
-        //else get from mongo
-        const data = await this.app.db.History.find({ clientId: uuid });
-        if (data.length > 0) {
-          this.app.redisClient.setex(
-            redisKey,
-            3600,
-            JSON.stringify({
-              source: "Redis Cache",
-              clientId: data[0].clientId,
-              rules: data.map((data) => ({
-                label: data.rules.map((data) => data.replace(" lang:en", " ")),
-                value: data.rules,
-              })),
-            })
-          );
-          return res.status(200).json({
-            source: "MongoDB",
-            clientId: data[0].clientId,
-            rules: data.map((data) => ({
-              label: data.rules.map((data) => data.replace(" lang:en", " ")),
-              value: data.rules,
-            })),
-          });
-        } else {
-          res.status(200).json({
-            source: null,
-            rules: [],
-          });
-        }
-      }
-    });
+    // //try get data from redis
+    // return this.app.redisClient.get(redisKey, async (err, result) => {
+    //   //if there is result
+    //   if (result) {
+    //     const resultJSON = JSON.parse(result);
+    //     return res.status(200).json(resultJSON);
+    // } else {
+    //else get from mongo
+    const data = await this.app.db.History.find({ clientId: uuid });
+    if (data.length > 0) {
+      //   this.app.redisClient.setex(
+      //     redisKey,
+      //     3600,
+      //     JSON.stringify({
+      //       source: "Redis Cache",
+      //       clientId: data[0].clientId,
+      //       rules: data.map((data) => ({
+      //         label: data.rules.map((data) => data.replace(" lang:en", " ")),
+      //         value: data.rules,
+      //       })),
+      //     })
+      //   );
+      return res.status(200).json({
+        source: "MongoDB",
+        clientId: data[0].clientId,
+        rules: data.map((data) => ({
+          label: data.rules.map((data) => data.replace(" lang:en", " ")),
+          value: data.rules,
+        })),
+      });
+    } else {
+      res.status(200).json({
+        source: null,
+        rules: [],
+      });
+    }
+    // }
+    // });
   };
 
   getTweets = async (req, res, next) => {
