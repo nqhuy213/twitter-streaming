@@ -40,7 +40,7 @@ class Controller {
   addStreamRules = async (req, res, next) => {
     try {
       const { rules } = req.body;
-      const response = await getMyOwnRules(rules);
+      const response = addRules(rules);
       successResponse(res, { add: response });
     } catch (error) {
       errorResponse(res, 500, error.message);

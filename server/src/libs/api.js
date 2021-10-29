@@ -15,15 +15,9 @@ const getMyOwnRules = async (keywords) => {
     existRules = existRules.data ? existRules.data : [];
     /** Add non-existing rules */
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
-    const ownRules = addRules(toAddRules)
-      .then((res) => {
-        if (res.data !== undefined) {
-          myRules = [...myRules, ...res.data];
-          return myRules;
-        }
-      })
-      .catch((err) => console.log(err));
-    return ownRules;
+
+    const ownRules = await addRules(toAddRules);
+    return ownRules.data;
   } catch (error) {
     console.log(error);
     throw error;
