@@ -7,6 +7,7 @@
     "dev:stream": "cross-env NODE_ENV=development node src/stream-service/app.js",
     "dev:filter": "cross-env NODE_ENV=development nodemon src/filter-service/app.js",
     "dev:filter-2": "cross-env NODE_ENV=development nodemon src/filter-service-2/app.js",
+    "dev:filter-3": "cross-env NODE_ENV=development nodemon src/filter-service-3/app.js",
     "dev:worker": "cross-env NODE_ENV=development node src/sync-worker/worker.js",
     "dev:client": "cross-env NODE_ENV=development nodemon src/client/index.js",
     "build": "babel -d ./build ./src -s",

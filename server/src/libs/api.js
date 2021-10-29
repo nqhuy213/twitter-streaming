@@ -17,7 +17,7 @@ const getMyOwnRules = async (keywords) => {
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
 
     const ownRules = await addRules(toAddRules);
-    return ownRules.data;
+    return [...ownRules.data, ...myRules];
   } catch (error) {
     console.log(error);
     throw error;
@@ -55,6 +55,7 @@ const deleteRules = async (rules) => {
   let existedRules = await getRules();
   if (existedRules.data !== undefined) {
     existedRules = existedRules.data;
+
     const values = rules.map((rule) => rule.value);
     let ids = [];
     for (const rule of existedRules) {
@@ -62,7 +63,6 @@ const deleteRules = async (rules) => {
         ids.push(rule.id);
       }
     }
-
     const body = {
       delete: { ids },
     };

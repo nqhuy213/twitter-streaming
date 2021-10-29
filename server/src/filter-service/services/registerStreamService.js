@@ -43,7 +43,6 @@ function registerStreamService(url, app) {
               { $push: { data: { ...sentiment } } }
             );
           });
-          break;
         }
       }
     }

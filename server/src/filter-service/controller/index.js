@@ -73,11 +73,25 @@ class Controller {
   deleteStreamRules = async (req, res, next) => {
     try {
       const { clientId, rules } = req.body;
-      const response = await deleteRules(rules);
-      /** Delete client in the stream collection */
       await this.app.db.Stream.deleteOne({ clientId: clientId });
+      const remainingStreams = await this.app.db.Stream.find({
+        clientId: { $ne: clientId },
+      });
+      console.log(rules);
+      let remainingRules = [];
+      remainingStreams.map((stream) =>
+        stream.rules.map((rule) => remainingRules.push(rule.value))
+      );
+      let toDeleteRules = rules.filter(
+        (rule) => !remainingRules.includes(rule.value)
+      );
+      console.log(toDeleteRules);
+      const response = await deleteRules(toDeleteRules);
+      /** Delete client in the stream collection */
+
       successResponse(res, { deleted: response });
     } catch (error) {
+      console.log(error);
       errorResponse(res, 500, error.message);
     }
   };
