@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:stream": "cross-env NODE_ENV=development nodemon src/stream-service/app.js",
+    "dev:stream": "cross-env NODE_ENV=development node src/stream-service/app.js",
     "dev:filter": "cross-env NODE_ENV=development nodemon src/filter-service/app.js",
     "dev:filter-2": "cross-env NODE_ENV=development nodemon src/filter-service-2/app.js",
-    "dev:worker": "cross-env NODE_ENV=development nodemon src/sync-worker/worker.js",
+    "dev:filter-3": "cross-env NODE_ENV=development nodemon src/filter-service-3/app.js",
+    "dev:worker": "cross-env NODE_ENV=development node src/sync-worker/worker.js",
     "dev:client": "cross-env NODE_ENV=development nodemon src/client/index.js",
     "build": "babel -d ./build ./src -s",
-    "start:stream": "node ./build/stream-service/app.js"
+    "start:stream": "nodemon ./build/stream-service/app.js",
+    "start:filter": "nodemon ./build/filter-service/app.js",
+    "start:worker": "nodemon ./build/sync-worker/app.js"
   },
   "keywords": [],
   "author": "Harvey Nguyen",
@@ -18,15 +21,21 @@
   "dependencies": {
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.5",
+    "@babel/runtime": "^7.15.4",
     "axios": "^0.21.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
+    "natural": "^5.1.1",
     "needle": "^3.0.0",
+    "redis": "^3.1.2",
+    "redis-rstream": "^1.0.1",
+    "redis-streams": "^1.1.0",
+    "redis-wstream": "^1.0.0",
     "socket.io": "^4.2.0",
     "socket.io-client": "^4.2.0",
-    "@babel/runtime": "^7.15.4"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/node": "^7.15.4",

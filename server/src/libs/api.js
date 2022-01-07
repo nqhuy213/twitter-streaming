@@ -1,3 +1,4 @@
+/** This module is to integrate with Twitter API */
 const axios = require("axios").default;
 const needle = require("needle");
 const { rulesConstructor } = require("../libs/utils");
@@ -7,18 +8,16 @@ const twitterStreamUrl =
 const twitterStreamRules =
   "https://api.twitter.com/2/tweets/search/stream/rules";
 
-const searchTweets = async (keywords) => {
+/**Add rules into Twitter API, ignore existing rules */
+const getMyOwnRules = async (keywords) => {
   try {
     let existRules = await getRules();
     existRules = existRules.data ? existRules.data : [];
     /** Add non-existing rules */
     let [toAddRules, myRules] = rulesConstructor(keywords, existRules);
-    console.log(toAddRules);
-    const ownRules = addRules(toAddRules).then((res) => {
-      myRules = [...myRules, ...res.data];
-      return myRules;
-    });
-    return ownRules;
+
+    const ownRules = await addRules(toAddRules);
+    return [...ownRules.data, ...myRules];
   } catch (error) {
     console.log(error);
     throw error;
@@ -27,7 +26,7 @@ const searchTweets = async (keywords) => {
 
 const getStream = () => {
   const stream = needle.get(twitterStreamUrl, {
-    headers: { Authorization: `Bearer ${process.env.TWITTER_TOKEN}` },
+    headers: { Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },
   });
 
   return stream;
@@ -54,29 +53,33 @@ const addRules = async (rules) => {
 
 const deleteRules = async (rules) => {
   let existedRules = await getRules();
-  existedRules = existedRules.data;
-  const values = rules.map((rule) => rule.value);
-  let ids = [];
-  for (const rule of existedRules) {
-    if (values.includes(rule.value)) {
-      ids.push(rule.id);
+  if (existedRules.data !== undefined) {
+    existedRules = existedRules.data;
+
+    const values = rules.map((rule) => rule.value);
+    let ids = [];
+    for (const rule of existedRules) {
+      if (values.includes(rule.value)) {
+        ids.push(rule.id);
+      }
     }
-  }
+    const body = {
+      delete: { ids },
+    };
+    try {
+      const response = await twitterApiCall(
+        "POST",
+        twitterStreamRules,
+        null,
+        body
+      );
 
-  const body = {
-    delete: { ids },
-  };
-  try {
-    const response = await twitterApiCall(
-      "POST",
-      twitterStreamRules,
-      null,
-      body
-    );
-
-    return response;
-  } catch (error) {
-    throw error;
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    return { message: "Nothing to delete!" };
   }
 };
 
@@ -96,7 +99,7 @@ const twitterApiCall = async (method = "GET", url, params, body) => {
     params: params,
     data: body,
     headers: {
-      Authorization: `Bearer ${process.env.TWITTER_TOKEN}`,
+      Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
       "Content-Type": "application/json",
     },
   };
@@ -108,4 +111,40 @@ const twitterApiCall = async (method = "GET", url, params, body) => {
   }
 };
 
-module.exports = { searchTweets, getStream, getRules, deleteRules, addRules };
+//delete all the rules in twitter
+const deleteAllRules = async () => {
+  let existedRules = await getRules();
+  if (existedRules.meta.result_count > 0) {
+    existedRules = existedRules.data;
+    let ids = [];
+    for (const rule of existedRules) {
+      ids.push(rule.id);
+    }
+
+    const body = {
+      delete: { ids },
+    };
+
+    try {
+      const response = await twitterApiCall(
+        "POST",
+        twitterStreamRules,
+        null,
+        body
+      );
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+module.exports = {
+  getMyOwnRules,
+  getStream,
+  getRules,
+  deleteRules,
+  addRules,
+  deleteAllRules,
+};

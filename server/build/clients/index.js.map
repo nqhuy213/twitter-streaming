@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/clients/index.js"],"names":["require"],"mappings":";;AAAAA,OAAO,CAAC,WAAD,CAAP;;AACAA,OAAO,CAAC,WAAD,CAAP;;AACAA,OAAO,CAAC,WAAD,CAAP;;AACAA,OAAO,CAAC,WAAD,CAAP","sourcesContent":["require(\"./client3\");\r\nrequire(\"./client4\");\r\nrequire(\"./client1\");\r\nrequire(\"./client2\");\r\n"],"file":"index.js"}

@@ -1,13 +1,16 @@
 const express = require("express");
-const registerRoutes = require("./registerRoutes");
-const registerMiddlewares = require("./registerMiddlewares");
-const registerSocket = require("./registerSocket");
-const io = require("socket.io-client");
-const connect = require("./socket/client");
+const registerRoutes = require("./routes/registerRoutes");
+const registerMiddlewares = require("./middlewares/registerMiddlewares");
+const {
+  createSocketServer,
+  deregisterAllSockets,
+} = require("./socket/createSocketServer");
+const registerStreamService = require("./services/registerStreamService");
 const registerDatabase = require("../libs/database/registerDatabase");
-
+const registerRedis = require("./redis/registerRedis");
+const path = require("path");
 if (process.env.NODE_ENV === "development") {
-  require("dotenv").config();
+  require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 }
 
 function createApp() {
@@ -19,13 +22,18 @@ function createApp() {
 
 function startApp() {
   const app = createApp();
+
   const server = app.listen(process.env.FILTER_PORT, () => {
+    //for the sake of testing, deregister all sockets
+    deregisterAllSockets();
     registerDatabase(app, () => {
-      registerSocket(server, app);
-      connect(process.env.STREAM_SERVICE_URL, app);
-      console.log(
-        `Server is running on http://localhost:${process.env.FILTER_PORT}`
-      );
+      registerRedis(app, () => {
+        createSocketServer(server, app);
+        registerStreamService(process.env.STREAM_SERVICE_URL, app);
+        console.log(
+          `Server is running on http://localhost:${process.env.FILTER_PORT}`
+        );
+      });
     });
   });
 }
